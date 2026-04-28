@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Boleta #{{ boleta.numero }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 12px; color: #1a1a1a; padding: 40px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 2px solid #e53e3e; padding-bottom: 20px; }
+    .company-name { font-size: 22px; font-weight: bold; color: #e53e3e; }
+    .company-info { font-size: 11px; color: #555; margin-top: 4px; }
+    .boleta-info { text-align: right; }
+    .boleta-numero { font-size: 20px; font-weight: bold; }
+    .boleta-fecha { color: #555; font-size: 11px; margin-top: 4px; }
+    .section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 5px; }
+    .cliente-box { background: #f8f8f8; padding: 12px; border-radius: 6px; margin-bottom: 25px; }
+    .cliente-nombre { font-weight: bold; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    thead { background: #1a202c; color: white; }
+    th { padding: 8px 12px; text-align: left; font-size: 10px; text-transform: uppercase; }
+    th:last-child, td:last-child { text-align: right; }
+    td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+    tbody tr:last-child td { border-bottom: none; }
+    .totals { float: right; width: 220px; }
+    .total-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; color: #555; }
+    .total-final { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; font-weight: bold; border-top: 2px solid #1a202c; margin-top: 4px; }
+    .estado { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+    .estado-pagada { background: #c6f6d5; color: #276749; }
+    .estado-emitida { background: #bee3f8; color: #2c5282; }
+    .estado-borrador { background: #e2e8f0; color: #4a5568; }
+    .observaciones { margin-top: 30px; padding: 10px; background: #f8f8f8; border-left: 3px solid #e53e3e; border-radius: 4px; }
+    .footer { margin-top: 40px; text-align: center; color: #aaa; font-size: 10px; border-top: 1px solid #eee; padding-top: 15px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="company-name">MotoTaller</div>
+      <div class="company-info">Av. Principal 1234, Santiago<br>+56 9 1234 5678 | contacto@mototaller.cl</div>
+    </div>
+    <div class="boleta-info">
+      <div class="boleta-numero">Boleta #{{ boleta.numero }}</div>
+      <div class="boleta-fecha">{{ boleta.fecha_emision|date:"d/m/Y" }}</div>
+      <div style="margin-top:6px">
+        <span class="estado estado-{{ boleta.estado }}">{{ boleta.get_estado_display }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cliente-box">
+    <div class="section-title">Cliente</div>
+    <div class="cliente-nombre">{{ boleta.cliente.nombre }}</div>
+    <div style="color:#555; margin-top:3px">
+      RUT: {{ boleta.cliente.rut }}
+      {% if boleta.cliente.telefono %} | Tel: {{ boleta.cliente.telefono }}{% endif %}
+      {% if boleta.cliente.correo %} | {{ boleta.cliente.correo }}{% endif %}
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Descripción</th>
+        <th style="text-align:right">Cant.</th>
+        <th style="text-align:right">P. Unit.</th>
+        <th style="text-align:right">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in boleta.items.all %}
+      <tr>
+        <td>{{ item.get_tipo_display }}</td>
+        <td>{{ item.descripcion }}</td>
+        <td style="text-align:right">{{ item.cantidad }}</td>
+        <td style="text-align:right">${{ item.precio_unitario|floatformat:0 }}</td>
+        <td style="text-align:right">${{ item.subtotal|floatformat:0 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <div class="total-row"><span>Subtotal (neto)</span><span>${{ boleta.subtotal|floatformat:0 }}</span></div>
+    <div class="total-row"><span>IVA (19%)</span><span>${{ boleta.iva|floatformat:0 }}</span></div>
+    <div class="total-final"><span>TOTAL</span><span>${{ boleta.total|floatformat:0 }}</span></div>
+  </div>
+
+  <div style="clear:both"></div>
+
+  {% if boleta.observaciones %}
+  <div class="observaciones">
+    <strong>Observaciones:</strong> {{ boleta.observaciones }}
+  </div>
+  {% endif %}
+
+  <div class="footer">
+    Documento generado el {% now "d/m/Y H:i" %} | MotoTaller
+  </div>
+</body>
+</html>

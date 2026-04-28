@@ -1,0 +1,93 @@
+{% extends "base_admin.html" %}
+{% block title %}Boleta #{{ boleta.numero }} — MotoTaller{% endblock %}
+{% block page_title %}Boleta #{{ boleta.numero }}{% endblock %}
+
+{% block page_content %}
+<div class="flex items-center justify-between mb-6">
+  <div class="flex items-center gap-2">
+    <span class="text-xs px-2 py-0.5 rounded-full
+      {% if boleta.estado == 'pagada' %}bg-green-900 text-green-400
+      {% elif boleta.estado == 'emitida' %}bg-blue-900 text-blue-400
+      {% elif boleta.estado == 'anulada' %}bg-red-900 text-red-400
+      {% else %}bg-gray-800 text-gray-400{% endif %}">
+      {{ boleta.get_estado_display }}
+    </span>
+    <span class="text-gray-500 text-sm">{{ boleta.fecha_emision|date:"d/m/Y" }}</span>
+  </div>
+  <div class="flex gap-2">
+    <a href="{% url 'boletas:editar' boleta.pk %}" class="btn-secondary">Editar</a>
+    <a href="{% url 'boletas:pdf' boleta.pk %}" class="btn-primary">Descargar PDF</a>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Tabla de ítems -->
+  <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-gray-800 text-xs text-gray-500 uppercase">
+          <th class="px-5 py-3 text-left">Tipo</th>
+          <th class="px-5 py-3 text-left">Descripción</th>
+          <th class="px-5 py-3 text-right">Cant.</th>
+          <th class="px-5 py-3 text-right">P. Unit.</th>
+          <th class="px-5 py-3 text-right">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in boleta.items.all %}
+        <tr class="border-b border-gray-800">
+          <td class="px-5 py-3">
+            <span class="text-xs px-2 py-0.5 rounded-full {% if item.tipo == 'repuesto' %}bg-orange-900 text-orange-400{% else %}bg-purple-900 text-purple-400{% endif %}">
+              {{ item.get_tipo_display }}
+            </span>
+          </td>
+          <td class="px-5 py-3 text-white">{{ item.descripcion }}</td>
+          <td class="px-5 py-3 text-right text-gray-400">{{ item.cantidad }}</td>
+          <td class="px-5 py-3 text-right text-gray-400">${{ item.precio_unitario|floatformat:0 }}</td>
+          <td class="px-5 py-3 text-right font-semibold text-white">${{ item.subtotal|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Resumen -->
+  <div class="space-y-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+      <h2 class="font-semibold mb-4">Cliente</h2>
+      <a href="{% url 'clientes:detalle' boleta.cliente.pk %}" class="text-red-400 hover:text-red-300 font-medium">
+        {{ boleta.cliente.nombre }}
+      </a>
+      <p class="text-gray-400 text-sm mt-1">{{ boleta.cliente.rut }}</p>
+      {% if boleta.cliente.telefono %}
+      <p class="text-gray-400 text-sm">{{ boleta.cliente.telefono }}</p>
+      {% endif %}
+    </div>
+
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+      <h2 class="font-semibold mb-4">Resumen</h2>
+      <dl class="space-y-2 text-sm">
+        <div class="flex justify-between text-gray-400">
+          <dt>Subtotal (neto)</dt>
+          <dd>${{ boleta.subtotal|floatformat:0 }}</dd>
+        </div>
+        <div class="flex justify-between text-gray-400">
+          <dt>IVA (19%)</dt>
+          <dd>${{ boleta.iva|floatformat:0 }}</dd>
+        </div>
+        <div class="flex justify-between text-white font-bold text-base pt-2 border-t border-gray-800">
+          <dt>Total</dt>
+          <dd class="text-green-400">${{ boleta.total|floatformat:0 }}</dd>
+        </div>
+      </dl>
+    </div>
+
+    {% if boleta.observaciones %}
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+      <h2 class="font-semibold mb-2">Observaciones</h2>
+      <p class="text-gray-400 text-sm">{{ boleta.observaciones }}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

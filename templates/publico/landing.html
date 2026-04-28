@@ -1,0 +1,159 @@
+{% extends "base_publico.html" %}
+{% block title %}MotoTaller — Taller de Motos{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="bg-gradient-to-b from-gray-900 to-gray-950 py-24 px-4 text-center">
+  <div class="max-w-3xl mx-auto">
+    <span class="inline-block bg-red-900/40 text-red-400 text-xs font-semibold px-3 py-1 rounded-full mb-4 uppercase tracking-widest">Taller Profesional</span>
+    <h1 class="text-5xl font-extrabold leading-tight mb-4">
+      Tu moto en manos<br><span class="text-red-500">de expertos</span>
+    </h1>
+    <p class="text-gray-400 text-lg mb-8 max-w-xl mx-auto">
+      Mantenimiento, reparación y diagnóstico de motos de todas las marcas. Repuestos originales y garantía en cada trabajo.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="#contacto" class="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3 rounded-xl transition text-sm">
+        Contáctanos
+      </a>
+      <a href="#servicios" class="border border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white font-semibold px-8 py-3 rounded-xl transition text-sm">
+        Ver servicios
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Servicios -->
+<section id="servicios" class="py-20 px-4 bg-gray-950">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold mb-2">Nuestros Servicios</h2>
+      <p class="text-gray-400">Todo lo que tu moto necesita en un solo lugar</p>
+    </div>
+    {% if servicios %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for servicio in servicios %}
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-red-700/50 transition">
+        <div class="w-10 h-10 bg-red-600/20 rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-white mb-2">{{ servicio.nombre }}</h3>
+        <p class="text-gray-400 text-sm">{{ servicio.descripcion }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for item in "Mantención|Cambio de aceite y filtros, revisión general.|Frenos|Ajuste y cambio de pastillas, discos y cables.|Suspensión|Regulación de horquillas y amortiguadores.|Electricidad|Diagnóstico y reparación del sistema eléctrico.|Motor|Reparación completa y puesta a punto del motor.|Repuestos|Venta e instalación de repuestos originales."|split:"|" %}{% endfor %}
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+        <div class="w-10 h-10 bg-red-600/20 rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3 class="font-semibold text-white mb-2">Mantención General</h3>
+        <p class="text-gray-400 text-sm">Cambio de aceite y filtros, revisión general de tu moto.</p>
+      </div>
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+        <div class="w-10 h-10 bg-red-600/20 rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3 class="font-semibold text-white mb-2">Frenos</h3>
+        <p class="text-gray-400 text-sm">Ajuste y cambio de pastillas, discos y cables de freno.</p>
+      </div>
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+        <div class="w-10 h-10 bg-red-600/20 rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <h3 class="font-semibold text-white mb-2">Electricidad</h3>
+        <p class="text-gray-400 text-sm">Diagnóstico y reparación del sistema eléctrico completo.</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Por qué elegirnos -->
+<section id="nosotros" class="py-20 px-4 bg-gray-900">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+    <div>
+      <h2 class="text-3xl font-bold mb-4">¿Por qué elegirnos?</h2>
+      <p class="text-gray-400 mb-6">Más de 10 años de experiencia en el rubro, con mecánicos certificados y tecnología de diagnóstico de última generación.</p>
+      <ul class="space-y-3 text-sm text-gray-300">
+        <li class="flex items-center gap-3"><span class="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-white text-xs">✓</span> Mecánicos certificados</li>
+        <li class="flex items-center gap-3"><span class="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-white text-xs">✓</span> Repuestos originales y garantizados</li>
+        <li class="flex items-center gap-3"><span class="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-white text-xs">✓</span> Presupuesto sin compromiso</li>
+        <li class="flex items-center gap-3"><span class="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-white text-xs">✓</span> Entrega en el plazo acordado</li>
+      </ul>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="bg-gray-800 rounded-2xl p-6 text-center">
+        <p class="text-4xl font-extrabold text-red-500">+500</p>
+        <p class="text-gray-400 text-sm mt-1">Motos reparadas</p>
+      </div>
+      <div class="bg-gray-800 rounded-2xl p-6 text-center">
+        <p class="text-4xl font-extrabold text-red-500">10+</p>
+        <p class="text-gray-400 text-sm mt-1">Años de experiencia</p>
+      </div>
+      <div class="bg-gray-800 rounded-2xl p-6 text-center">
+        <p class="text-4xl font-extrabold text-red-500">98%</p>
+        <p class="text-gray-400 text-sm mt-1">Clientes satisfechos</p>
+      </div>
+      <div class="bg-gray-800 rounded-2xl p-6 text-center">
+        <p class="text-4xl font-extrabold text-red-500">24h</p>
+        <p class="text-gray-400 text-sm mt-1">Tiempo promedio entrega</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Ubicación y Contacto -->
+<section id="ubicacion" class="py-20 px-4 bg-gray-950">
+  <div class="max-w-4xl mx-auto text-center">
+    <h2 class="text-3xl font-bold mb-2">Dónde encontrarnos</h2>
+    <p class="text-gray-400 mb-8">Visítanos sin cita previa, lunes a sábado</p>
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-left grid md:grid-cols-3 gap-6">
+      <div>
+        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Dirección</p>
+        <p class="text-white font-medium">Av. Principal 1234, Santiago</p>
+      </div>
+      <div>
+        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Horario</p>
+        <p class="text-white font-medium">Lun–Vie: 9:00–18:30</p>
+        <p class="text-white font-medium">Sáb: 9:00–14:00</p>
+      </div>
+      <div>
+        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Teléfono</p>
+        <p class="text-white font-medium">+56 9 1234 5678</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contacto -->
+<section id="contacto" class="py-20 px-4 bg-gray-900">
+  <div class="max-w-xl mx-auto text-center">
+    <h2 class="text-3xl font-bold mb-2">Contáctanos</h2>
+    <p class="text-gray-400 mb-8">Escríbenos y te responderemos a la brevedad</p>
+    <form class="space-y-4 text-left">
+      <div>
+        <label class="block text-sm text-gray-400 mb-1">Nombre</label>
+        <input type="text" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Tu nombre">
+      </div>
+      <div>
+        <label class="block text-sm text-gray-400 mb-1">Correo</label>
+        <input type="email" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="correo@ejemplo.cl">
+      </div>
+      <div>
+        <label class="block text-sm text-gray-400 mb-1">Mensaje</label>
+        <textarea rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="¿En qué podemos ayudarte?"></textarea>
+      </div>
+      <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition text-sm">
+        Enviar mensaje
+      </button>
+    </form>
+  </div>
+</section>
+{% endblock %}

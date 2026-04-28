@@ -1,0 +1,107 @@
+{% extends "base_admin.html" %}
+{% block title %}Caja {{ sesion.fecha|date:"d/m/Y" }} — MotoTaller{% endblock %}
+{% block page_title %}Caja {{ sesion.fecha|date:"d/m/Y" }}{% endblock %}
+
+{% block page_content %}
+<div class="flex items-center gap-3 mb-6">
+  <span class="text-xs px-2 py-0.5 rounded-full {% if sesion.cerrada %}bg-green-900 text-green-400{% else %}bg-yellow-900 text-yellow-400{% endif %}">
+    {{ sesion.cerrada|yesno:"Cerrada,Abierta" }}
+  </span>
+  {% if not sesion.cerrada %}
+  <a href="{% url 'caja:cerrar' sesion.pk %}"
+     onclick="return confirm('¿Confirmar cierre?')"
+     class="text-xs bg-yellow-700 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg transition">
+    Cerrar caja
+  </a>
+  {% endif %}
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+    <p class="text-xs text-gray-500 uppercase mb-1">Apertura</p>
+    <p class="text-xl font-bold text-white">${{ sesion.monto_apertura|floatformat:0 }}</p>
+    <p class="text-xs text-gray-500 mt-1">{{ sesion.hora_apertura|time:"H:i" }}</p>
+  </div>
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+    <p class="text-xs text-gray-500 uppercase mb-1">Saldo actual</p>
+    <p class="text-xl font-bold {% if sesion.saldo_actual >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+      ${{ sesion.saldo_actual|floatformat:0 }}
+    </p>
+  </div>
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+    <p class="text-xs text-gray-500 uppercase mb-1">Cierre</p>
+    {% if sesion.monto_cierre %}
+    <p class="text-xl font-bold text-white">${{ sesion.monto_cierre|floatformat:0 }}</p>
+    <p class="text-xs text-gray-500 mt-1">{{ sesion.hora_cierre|time:"H:i" }}</p>
+    {% else %}
+    <p class="text-gray-500 text-sm">Pendiente</p>
+    {% endif %}
+  </div>
+</div>
+
+{% if not sesion.cerrada %}
+<div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6 max-w-lg">
+  <h2 class="font-semibold mb-4">Registrar movimiento</h2>
+  <form method="post" action="{% url 'caja:movimiento' sesion.pk %}">
+    {% csrf_token %}
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Tipo</label>
+        <select name="tipo" class="input-field">
+          <option value="ingreso">Ingreso</option>
+          <option value="egreso">Egreso</option>
+          <option value="retiro">Retiro</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Monto ($)</label>
+        <input type="number" name="monto" min="1" class="input-field" placeholder="0" required>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="block text-xs text-gray-500 mb-1">Descripción</label>
+      <input type="text" name="descripcion" class="input-field" placeholder="Descripción" required>
+    </div>
+    <button type="submit" class="btn-primary">Registrar</button>
+  </form>
+</div>
+{% endif %}
+
+<div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+  <div class="px-5 py-4 border-b border-gray-800">
+    <h2 class="font-semibold">Movimientos</h2>
+  </div>
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b border-gray-800 text-xs text-gray-500 uppercase">
+        <th class="px-5 py-3 text-left">Hora</th>
+        <th class="px-5 py-3 text-left">Tipo</th>
+        <th class="px-5 py-3 text-left">Descripción</th>
+        <th class="px-5 py-3 text-right">Monto</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for mov in sesion.movimientos.all %}
+      <tr class="border-b border-gray-800 hover:bg-gray-800/50">
+        <td class="px-5 py-3 text-gray-400">{{ mov.hora|time:"H:i" }}</td>
+        <td class="px-5 py-3">
+          <span class="text-xs px-2 py-0.5 rounded-full
+            {% if mov.tipo == 'ingreso' %}bg-green-900 text-green-400
+            {% elif mov.tipo == 'egreso' %}bg-red-900 text-red-400
+            {% else %}bg-orange-900 text-orange-400{% endif %}">
+            {{ mov.get_tipo_display }}
+          </span>
+        </td>
+        <td class="px-5 py-3 text-white">{{ mov.descripcion }}</td>
+        <td class="px-5 py-3 text-right font-semibold
+          {% if mov.tipo == 'ingreso' %}text-green-400{% else %}text-red-400{% endif %}">
+          {% if mov.tipo == 'ingreso' %}+{% else %}-{% endif %}${{ mov.monto|floatformat:0 }}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="px-5 py-8 text-center text-gray-500">Sin movimientos</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

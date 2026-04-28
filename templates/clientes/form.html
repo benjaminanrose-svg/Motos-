@@ -1,0 +1,26 @@
+{% extends "base_admin.html" %}
+{% block title %}{% if object %}Editar{% else %}Nuevo{% endif %} Cliente — MotoTaller{% endblock %}
+{% block page_title %}{% if object %}Editar Cliente{% else %}Nuevo Cliente{% endif %}{% endblock %}
+
+{% block page_content %}
+<div class="max-w-lg">
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-400 mb-1.5">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+        <p class="text-red-400 text-xs mt-1">{{ field.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+      <div class="flex gap-3 mt-6">
+        <button type="submit" class="btn-primary">Guardar</button>
+        <a href="{% url 'clientes:lista' %}" class="btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

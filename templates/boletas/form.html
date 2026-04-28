@@ -1,0 +1,92 @@
+{% extends "base_admin.html" %}
+{% block title %}{% if object %}Editar{% else %}Nueva{% endif %} Boleta — MotoTaller{% endblock %}
+{% block page_title %}{% if object %}Editar Boleta #{{ object.numero }}{% else %}Nueva Boleta{% endif %}{% endblock %}
+
+{% block page_content %}
+<div class="max-w-3xl">
+  <form method="post" id="boleta-form">
+    {% csrf_token %}
+
+    <!-- Datos generales -->
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-5">
+      <h2 class="font-semibold mb-4">Datos generales</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for field in form %}
+        <div class="{% if forloop.last %}md:col-span-2{% endif %}">
+          <label class="block text-sm font-medium text-gray-400 mb-1.5">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<p class="text-red-400 text-xs mt-1">{{ field.errors|join:", " }}</p>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Ítems -->
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-5">
+      <h2 class="font-semibold mb-4">Ítems</h2>
+      {{ formset.management_form }}
+      <div id="items-container" class="space-y-3">
+        {% for item_form in formset %}
+        <div class="item-row grid grid-cols-12 gap-2 items-end border border-gray-800 rounded-xl p-3">
+          {{ item_form.id }}
+          <div class="col-span-2">
+            <label class="block text-xs text-gray-500 mb-1">Tipo</label>
+            {{ item_form.tipo }}
+          </div>
+          <div class="col-span-5">
+            <label class="block text-xs text-gray-500 mb-1">Descripción</label>
+            {{ item_form.descripcion }}
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs text-gray-500 mb-1">Cant.</label>
+            {{ item_form.cantidad }}
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs text-gray-500 mb-1">P. Unit.</label>
+            {{ item_form.precio_unitario }}
+          </div>
+          <div class="col-span-1 flex items-center justify-center">
+            {% if item_form.DELETE %}
+            <label class="text-red-500 cursor-pointer text-xs" title="Eliminar">
+              {{ item_form.DELETE }}
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </label>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button type="button" id="add-item" class="mt-3 text-sm text-red-400 hover:text-red-300 flex items-center gap-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Agregar ítem
+      </button>
+    </div>
+
+    <div class="flex gap-3">
+      <button type="submit" class="btn-primary">Guardar boleta</button>
+      <a href="{% url 'boletas:lista' %}" class="btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.getElementById('add-item').addEventListener('click', function() {
+    const container = document.getElementById('items-container');
+    const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+    const formIndex = parseInt(totalForms.value);
+    const firstRow = container.querySelector('.item-row');
+    if (!firstRow) return;
+    const newRow = firstRow.cloneNode(true);
+    newRow.innerHTML = newRow.innerHTML.replace(/items-\d+-/g, `items-${formIndex}-`);
+    newRow.querySelectorAll('input, select, textarea').forEach(el => {
+      if (el.type !== 'hidden' || el.name.includes('DELETE')) el.value = '';
+    });
+    container.appendChild(newRow);
+    totalForms.value = formIndex + 1;
+  });
+</script>
+{% endblock %}

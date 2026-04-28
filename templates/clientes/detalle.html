@@ -1,0 +1,64 @@
+{% extends "base_admin.html" %}
+{% block title %}{{ cliente.nombre }} — MotoTaller{% endblock %}
+{% block page_title %}{{ cliente.nombre }}{% endblock %}
+
+{% block page_content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Datos del cliente -->
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="font-semibold">Datos del cliente</h2>
+      <a href="{% url 'clientes:editar' cliente.pk %}" class="text-xs text-red-400 hover:text-red-300">Editar</a>
+    </div>
+    <dl class="space-y-3 text-sm">
+      <div><dt class="text-gray-500 text-xs uppercase">RUT</dt><dd class="text-white mt-0.5">{{ cliente.rut }}</dd></div>
+      <div><dt class="text-gray-500 text-xs uppercase">Teléfono</dt><dd class="text-white mt-0.5">{{ cliente.telefono|default:"—" }}</dd></div>
+      <div><dt class="text-gray-500 text-xs uppercase">Correo</dt><dd class="text-white mt-0.5">{{ cliente.correo|default:"—" }}</dd></div>
+      <div><dt class="text-gray-500 text-xs uppercase">Dirección</dt><dd class="text-white mt-0.5">{{ cliente.direccion|default:"—" }}</dd></div>
+      <div><dt class="text-gray-500 text-xs uppercase">Cliente desde</dt><dd class="text-white mt-0.5">{{ cliente.creado|date:"d/m/Y" }}</dd></div>
+    </dl>
+  </div>
+
+  <!-- Historial de boletas -->
+  <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="font-semibold">Boletas</h2>
+      <a href="{% url 'boletas:crear' %}?cliente={{ cliente.pk }}" class="btn-primary text-xs py-1.5">+ Nueva boleta</a>
+    </div>
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-gray-800 text-xs text-gray-500 uppercase">
+          <th class="pb-2 text-left">Nº</th>
+          <th class="pb-2 text-left">Fecha</th>
+          <th class="pb-2 text-left">Estado</th>
+          <th class="pb-2 text-right">Total</th>
+          <th class="pb-2"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for boleta in cliente.boletas.all %}
+        <tr class="border-b border-gray-800 hover:bg-gray-800/50">
+          <td class="py-2.5 text-white">#{{ boleta.numero }}</td>
+          <td class="py-2.5 text-gray-400">{{ boleta.fecha_emision|date:"d/m/Y" }}</td>
+          <td class="py-2.5">
+            <span class="text-xs px-2 py-0.5 rounded-full
+              {% if boleta.estado == 'pagada' %}bg-green-900 text-green-400
+              {% elif boleta.estado == 'emitida' %}bg-blue-900 text-blue-400
+              {% elif boleta.estado == 'anulada' %}bg-red-900 text-red-400
+              {% else %}bg-gray-800 text-gray-400{% endif %}">
+              {{ boleta.get_estado_display }}
+            </span>
+          </td>
+          <td class="py-2.5 text-right font-semibold text-green-400">${{ boleta.total|floatformat:0 }}</td>
+          <td class="py-2.5 text-right">
+            <a href="{% url 'boletas:detalle' boleta.pk %}" class="text-xs text-red-400 hover:text-red-300">Ver</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="py-8 text-center text-gray-500">Sin boletas</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
