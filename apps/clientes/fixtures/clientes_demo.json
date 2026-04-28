@@ -1,0 +1,5 @@
+[
+  {"model": "clientes.cliente", "pk": 1, "fields": {"nombre": "Juan Pérez González", "rut": "12345678-9", "telefono": "+56912345678", "correo": "juan.perez@email.cl", "direccion": "Av. Libertador 456, Santiago", "creado": "2025-01-15T10:00:00Z", "actualizado": "2025-01-15T10:00:00Z"}},
+  {"model": "clientes.cliente", "pk": 2, "fields": {"nombre": "María López Soto", "rut": "9876543-2", "telefono": "+56987654321", "correo": "maria.lopez@email.cl", "direccion": "Calle Los Aromos 789, Providencia", "creado": "2025-02-20T11:00:00Z", "actualizado": "2025-02-20T11:00:00Z"}},
+  {"model": "clientes.cliente", "pk": 3, "fields": {"nombre": "Carlos Rojas Muñoz", "rut": "15678901-3", "telefono": "+56956789012", "correo": "", "direccion": "", "creado": "2025-03-05T09:00:00Z", "actualizado": "2025-03-05T09:00:00Z"}}
+]

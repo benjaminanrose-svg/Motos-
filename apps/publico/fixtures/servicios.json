@@ -1,0 +1,8 @@
+[
+  {"model": "publico.servicio", "pk": 1, "fields": {"nombre": "Mantención General", "descripcion": "Cambio de aceite, filtros, revisión de niveles y ajuste general de la moto.", "icono": "wrench", "activo": true, "orden": 1}},
+  {"model": "publico.servicio", "pk": 2, "fields": {"nombre": "Frenos", "descripcion": "Ajuste, cambio de pastillas, discos y cables de freno delantero y trasero.", "icono": "shield", "activo": true, "orden": 2}},
+  {"model": "publico.servicio", "pk": 3, "fields": {"nombre": "Suspensión", "descripcion": "Regulación de horquillas, amortiguadores y rodamientos de dirección.", "icono": "adjustments", "activo": true, "orden": 3}},
+  {"model": "publico.servicio", "pk": 4, "fields": {"nombre": "Sistema Eléctrico", "descripcion": "Diagnóstico y reparación de batería, luces, arranque y cableado.", "icono": "lightning", "activo": true, "orden": 4}},
+  {"model": "publico.servicio", "pk": 5, "fields": {"nombre": "Motor", "descripcion": "Reparación completa, afinación y puesta a punto del motor.", "icono": "cog", "activo": true, "orden": 5}},
+  {"model": "publico.servicio", "pk": 6, "fields": {"nombre": "Repuestos", "descripcion": "Venta e instalación de repuestos originales y alternativos de calidad.", "icono": "cube", "activo": true, "orden": 6}}
+]

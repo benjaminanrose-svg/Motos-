@@ -7,20 +7,68 @@
   <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
     <form method="post" novalidate>
       {% csrf_token %}
+
       {% for field in form %}
       <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-400 mb-1.5">{{ field.label }}</label>
+        <label class="block text-sm font-medium text-gray-400 mb-1.5" for="{{ field.id_for_label }}">
+          {{ field.label }}
+          {% if field.field.required %}<span class="text-red-500 ml-0.5">*</span>{% endif %}
+        </label>
         {{ field }}
         {% if field.errors %}
         <p class="text-red-400 text-xs mt-1">{{ field.errors|join:", " }}</p>
         {% endif %}
+        {% if field.name == 'rut' %}
+        <p id="rut-feedback" class="text-xs mt-1 hidden"></p>
+        {% endif %}
       </div>
       {% endfor %}
+
       <div class="flex gap-3 mt-6">
-        <button type="submit" class="btn-primary">Guardar</button>
+        <button type="submit" class="btn-primary px-6">Guardar</button>
         <a href="{% url 'clientes:lista' %}" class="btn-secondary">Cancelar</a>
       </div>
     </form>
   </div>
 </div>
+
+<script>
+// Validación de RUT en tiempo real (feedback visual, no bloquea el submit)
+(function () {
+  const rutInput = document.querySelector('[data-rut="true"]');
+  const feedback = document.getElementById('rut-feedback');
+  if (!rutInput || !feedback) return;
+
+  function calcDV(n) {
+    let suma = 0, mult = 2;
+    String(n).split('').reverse().forEach(d => {
+      suma += parseInt(d) * mult;
+      mult = mult === 7 ? 2 : mult + 1;
+    });
+    const r = 11 - (suma % 11);
+    return r === 10 ? 'K' : r === 11 ? '0' : String(r);
+  }
+
+  rutInput.addEventListener('input', function () {
+    const raw = this.value.replace(/\./g, '').replace(/\s/g, '').toUpperCase();
+    if (!raw.includes('-') || raw.length < 3) {
+      feedback.className = 'text-xs mt-1 text-gray-500';
+      feedback.textContent = 'Formato: 12345678-9';
+      feedback.classList.remove('hidden');
+      return;
+    }
+    const [cuerpo, dv] = raw.split('-');
+    if (!/^\d+$/.test(cuerpo)) return;
+    const dvEsperado = calcDV(parseInt(cuerpo));
+    if (dv === dvEsperado) {
+      feedback.className = 'text-xs mt-1 text-green-400';
+      feedback.textContent = '✓ RUT válido';
+    } else {
+      feedback.className = 'text-xs mt-1 text-red-400';
+      feedback.textContent = `✗ Dígito verificador incorrecto (debería ser ${dvEsperado})`;
+    }
+    feedback.classList.remove('hidden');
+  });
+})();
+</script>
 {% endblock %}

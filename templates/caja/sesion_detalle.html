@@ -2,43 +2,57 @@
 {% block title %}Caja {{ sesion.fecha|date:"d/m/Y" }} — MotoTaller{% endblock %}
 {% block page_title %}Caja {{ sesion.fecha|date:"d/m/Y" }}{% endblock %}
 
-{% block page_content %}
-<div class="flex items-center gap-3 mb-6">
-  <span class="text-xs px-2 py-0.5 rounded-full {% if sesion.cerrada %}bg-green-900 text-green-400{% else %}bg-yellow-900 text-yellow-400{% endif %}">
-    {{ sesion.cerrada|yesno:"Cerrada,Abierta" }}
-  </span>
-  {% if not sesion.cerrada %}
-  <a href="{% url 'caja:cerrar' sesion.pk %}"
-     onclick="return confirm('¿Confirmar cierre?')"
-     class="text-xs bg-yellow-700 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg transition">
-    Cerrar caja
-  </a>
-  {% endif %}
-</div>
+{% block breadcrumb %}
+<a href="{% url 'caja:dashboard' %}" class="hover:text-gray-200 transition">Caja</a>
+<span class="mx-1">/</span>
+<span>{{ sesion.fecha|date:"d/m/Y" }}</span>
+{% endblock %}
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+{% block page_content %}
+<!-- KPIs -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
   <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
     <p class="text-xs text-gray-500 uppercase mb-1">Apertura</p>
-    <p class="text-xl font-bold text-white">${{ sesion.monto_apertura|floatformat:0 }}</p>
-    <p class="text-xs text-gray-500 mt-1">{{ sesion.hora_apertura|time:"H:i" }}</p>
+    <p class="text-2xl font-bold text-white">${{ sesion.monto_apertura|floatformat:0 }}</p>
+    <p class="text-xs text-gray-500 mt-1">{{ sesion.hora_apertura|time:"H:i" }} — {{ sesion.usuario_apertura.get_full_name|default:sesion.usuario_apertura.username }}</p>
   </div>
   <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+    <p class="text-xs text-gray-500 uppercase mb-1">Ingresos</p>
+    <p class="text-2xl font-bold text-green-400">${{ total_ingresos|floatformat:0 }}</p>
+  </div>
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+    <p class="text-xs text-gray-500 uppercase mb-1">Egresos + Retiros</p>
+    <p class="text-2xl font-bold text-red-400">${{ total_egresos|floatformat:0 }}</p>
+  </div>
+  <div class="bg-gray-900 border {% if sesion.saldo_actual >= 0 %}border-green-800{% else %}border-red-800{% endif %} rounded-2xl p-5">
     <p class="text-xs text-gray-500 uppercase mb-1">Saldo actual</p>
-    <p class="text-xl font-bold {% if sesion.saldo_actual >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+    <p class="text-2xl font-bold {% if sesion.saldo_actual >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
       ${{ sesion.saldo_actual|floatformat:0 }}
     </p>
-  </div>
-  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-    <p class="text-xs text-gray-500 uppercase mb-1">Cierre</p>
-    {% if sesion.monto_cierre %}
-    <p class="text-xl font-bold text-white">${{ sesion.monto_cierre|floatformat:0 }}</p>
-    <p class="text-xs text-gray-500 mt-1">{{ sesion.hora_cierre|time:"H:i" }}</p>
-    {% else %}
-    <p class="text-gray-500 text-sm">Pendiente</p>
+    {% if sesion.cerrada %}
+    <p class="text-xs text-gray-500 mt-1">Cerrada {{ sesion.hora_cierre|time:"H:i" }}</p>
     {% endif %}
   </div>
 </div>
 
+<!-- Acciones -->
+<div class="flex items-center gap-3 mb-6">
+  {% if not sesion.cerrada %}
+  <form method="post" action="{% url 'caja:cerrar' sesion.pk %}"
+        onsubmit="return confirm('¿Confirmar cierre? Saldo: ${{ sesion.saldo_actual|floatformat:0 }}')">
+    {% csrf_token %}
+    <button type="submit" class="bg-yellow-700 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
+      Cerrar caja
+    </button>
+  </form>
+  {% else %}
+  <span class="text-xs px-3 py-1.5 rounded-full bg-green-900 text-green-400 font-medium">
+    Cerrada · Monto final: ${{ sesion.monto_cierre|floatformat:0 }}
+  </span>
+  {% endif %}
+</div>
+
+<!-- Formulario movimiento (solo si abierta) -->
 {% if not sesion.cerrada %}
 <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6 max-w-lg">
   <h2 class="font-semibold mb-4">Registrar movimiento</h2>
@@ -47,33 +61,30 @@
     <div class="grid grid-cols-2 gap-3 mb-3">
       <div>
         <label class="block text-xs text-gray-500 mb-1">Tipo</label>
-        <select name="tipo" class="input-field">
-          <option value="ingreso">Ingreso</option>
-          <option value="egreso">Egreso</option>
-          <option value="retiro">Retiro</option>
-        </select>
+        {{ form_movimiento.tipo }}
       </div>
       <div>
         <label class="block text-xs text-gray-500 mb-1">Monto ($)</label>
-        <input type="number" name="monto" min="1" class="input-field" placeholder="0" required>
+        {{ form_movimiento.monto }}
       </div>
     </div>
     <div class="mb-3">
       <label class="block text-xs text-gray-500 mb-1">Descripción</label>
-      <input type="text" name="descripcion" class="input-field" placeholder="Descripción" required>
+      {{ form_movimiento.descripcion }}
     </div>
     <button type="submit" class="btn-primary">Registrar</button>
   </form>
 </div>
 {% endif %}
 
+<!-- Tabla de movimientos -->
 <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-  <div class="px-5 py-4 border-b border-gray-800">
-    <h2 class="font-semibold">Movimientos</h2>
+  <div class="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
+    <h2 class="font-semibold">Movimientos ({{ sesion.movimientos.count }})</h2>
   </div>
   <table class="w-full text-sm">
     <thead>
-      <tr class="border-b border-gray-800 text-xs text-gray-500 uppercase">
+      <tr class="border-b border-gray-800 text-xs text-gray-500 uppercase tracking-wider">
         <th class="px-5 py-3 text-left">Hora</th>
         <th class="px-5 py-3 text-left">Tipo</th>
         <th class="px-5 py-3 text-left">Descripción</th>
@@ -82,24 +93,32 @@
     </thead>
     <tbody>
       {% for mov in sesion.movimientos.all %}
-      <tr class="border-b border-gray-800 hover:bg-gray-800/50">
-        <td class="px-5 py-3 text-gray-400">{{ mov.hora|time:"H:i" }}</td>
+      <tr class="border-b border-gray-800 hover:bg-gray-800/40 transition">
+        <td class="px-5 py-3 text-gray-400 tabular-nums">{{ mov.hora|time:"H:i" }}</td>
         <td class="px-5 py-3">
-          <span class="text-xs px-2 py-0.5 rounded-full
+          <span class="text-xs px-2 py-0.5 rounded-full font-medium
             {% if mov.tipo == 'ingreso' %}bg-green-900 text-green-400
             {% elif mov.tipo == 'egreso' %}bg-red-900 text-red-400
             {% else %}bg-orange-900 text-orange-400{% endif %}">
             {{ mov.get_tipo_display }}
           </span>
         </td>
-        <td class="px-5 py-3 text-white">{{ mov.descripcion }}</td>
-        <td class="px-5 py-3 text-right font-semibold
+        <td class="px-5 py-3 text-white">
+          {{ mov.descripcion }}
+          {% if mov.boleta %}
+          <a href="{% url 'boletas:detalle' mov.boleta.pk %}"
+             class="ml-2 text-xs text-red-400 hover:text-red-300">
+            #{{ mov.boleta.numero }}
+          </a>
+          {% endif %}
+        </td>
+        <td class="px-5 py-3 text-right font-semibold tabular-nums
           {% if mov.tipo == 'ingreso' %}text-green-400{% else %}text-red-400{% endif %}">
           {% if mov.tipo == 'ingreso' %}+{% else %}-{% endif %}${{ mov.monto|floatformat:0 }}
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="4" class="px-5 py-8 text-center text-gray-500">Sin movimientos</td></tr>
+      <tr><td colspan="4" class="px-5 py-10 text-center text-gray-500">Sin movimientos registrados</td></tr>
       {% endfor %}
     </tbody>
   </table>

@@ -1,56 +1,75 @@
 {% extends "base_admin.html" %}
-{% block title %}{% if object %}Editar{% else %}Nueva{% endif %} Boleta — MotoTaller{% endblock %}
+{% block title %}{% if object %}Editar Boleta #{{ object.numero }}{% else %}Nueva Boleta{% endif %} — MotoTaller{% endblock %}
 {% block page_title %}{% if object %}Editar Boleta #{{ object.numero }}{% else %}Nueva Boleta{% endif %}{% endblock %}
 
 {% block page_content %}
-<div class="max-w-3xl">
+<div class="max-w-4xl">
   <form method="post" id="boleta-form">
     {% csrf_token %}
 
     <!-- Datos generales -->
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-5">
-      <h2 class="font-semibold mb-4">Datos generales</h2>
+      <h2 class="font-semibold mb-4 text-gray-200">Datos generales</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {% for field in form %}
-        <div class="{% if forloop.last %}md:col-span-2{% endif %}">
-          <label class="block text-sm font-medium text-gray-400 mb-1.5">{{ field.label }}</label>
-          {{ field }}
-          {% if field.errors %}<p class="text-red-400 text-xs mt-1">{{ field.errors|join:", " }}</p>{% endif %}
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-1.5">{{ form.cliente.label }}</label>
+          {{ form.cliente }}
+          {% if form.cliente.errors %}<p class="text-red-400 text-xs mt-1">{{ form.cliente.errors|join:", " }}</p>{% endif %}
         </div>
-        {% endfor %}
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-1.5">{{ form.estado.label }}</label>
+          {{ form.estado }}
+          {% if form.estado.errors %}<p class="text-red-400 text-xs mt-1">{{ form.estado.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-400 mb-1.5">{{ form.observaciones.label }}</label>
+          {{ form.observaciones }}
+        </div>
       </div>
     </div>
 
     <!-- Ítems -->
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-5">
-      <h2 class="font-semibold mb-4">Ítems</h2>
+      <h2 class="font-semibold mb-4 text-gray-200">Ítems de la boleta</h2>
       {{ formset.management_form }}
-      <div id="items-container" class="space-y-3">
+
+      <!-- Cabecera de la tabla -->
+      <div class="hidden md:grid grid-cols-12 gap-2 mb-2 px-1">
+        <div class="col-span-2 text-xs text-gray-500 uppercase">Tipo</div>
+        <div class="col-span-4 text-xs text-gray-500 uppercase">Descripción</div>
+        <div class="col-span-2 text-xs text-gray-500 uppercase">Cant.</div>
+        <div class="col-span-2 text-xs text-gray-500 uppercase">P. Unitario</div>
+        <div class="col-span-1 text-xs text-gray-500 uppercase text-right">Subtotal</div>
+        <div class="col-span-1"></div>
+      </div>
+
+      <div id="items-container" class="space-y-2">
         {% for item_form in formset %}
-        <div class="item-row grid grid-cols-12 gap-2 items-end border border-gray-800 rounded-xl p-3">
+        <div class="item-row grid grid-cols-12 gap-2 items-center bg-gray-800/50 border border-gray-700 rounded-xl px-3 py-2.5">
           {{ item_form.id }}
-          <div class="col-span-2">
-            <label class="block text-xs text-gray-500 mb-1">Tipo</label>
+          <div class="col-span-12 md:col-span-2">
             {{ item_form.tipo }}
           </div>
-          <div class="col-span-5">
-            <label class="block text-xs text-gray-500 mb-1">Descripción</label>
+          <div class="col-span-12 md:col-span-4">
             {{ item_form.descripcion }}
           </div>
-          <div class="col-span-2">
-            <label class="block text-xs text-gray-500 mb-1">Cant.</label>
-            {{ item_form.cantidad }}
+          <div class="col-span-4 md:col-span-2">
+            <input type="number" name="{{ item_form.cantidad.html_name }}" value="{{ item_form.cantidad.value|default:1 }}"
+              min="1" class="input-field cantidad-field" {% if item_form.cantidad.errors %}aria-invalid="true"{% endif %}>
           </div>
-          <div class="col-span-2">
-            <label class="block text-xs text-gray-500 mb-1">P. Unit.</label>
-            {{ item_form.precio_unitario }}
+          <div class="col-span-4 md:col-span-2">
+            <input type="number" name="{{ item_form.precio_unitario.html_name }}" value="{{ item_form.precio_unitario.value|default:'' }}"
+              min="0" placeholder="0" class="input-field precio-field">
+          </div>
+          <div class="col-span-3 md:col-span-1 text-right">
+            <span class="subtotal-display text-sm font-semibold text-green-400">$0</span>
           </div>
           <div class="col-span-1 flex items-center justify-center">
             {% if item_form.DELETE %}
-            <label class="text-red-500 cursor-pointer text-xs" title="Eliminar">
+            <label class="cursor-pointer text-gray-600 hover:text-red-400 transition" title="Eliminar fila">
               {{ item_form.DELETE }}
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
               </svg>
             </label>
             {% endif %}
@@ -58,7 +77,9 @@
         </div>
         {% endfor %}
       </div>
-      <button type="button" id="add-item" class="mt-3 text-sm text-red-400 hover:text-red-300 flex items-center gap-1">
+
+      <button type="button" id="add-item"
+        class="mt-3 flex items-center gap-1.5 text-sm text-red-400 hover:text-red-300 transition font-medium">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
@@ -66,27 +87,108 @@
       </button>
     </div>
 
+    <!-- Resumen de totales -->
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 mb-5 max-w-xs ml-auto">
+      <dl class="space-y-2 text-sm">
+        <div class="flex justify-between text-gray-400">
+          <dt>Subtotal neto</dt>
+          <dd id="resumen-subtotal" class="font-medium text-white">$0</dd>
+        </div>
+        <div class="flex justify-between text-gray-400">
+          <dt>IVA (19%)</dt>
+          <dd id="resumen-iva" class="font-medium text-white">$0</dd>
+        </div>
+        <div class="flex justify-between pt-2 border-t border-gray-700 font-bold text-base">
+          <dt class="text-white">Total</dt>
+          <dd id="resumen-total" class="text-green-400">$0</dd>
+        </div>
+      </dl>
+    </div>
+
     <div class="flex gap-3">
-      <button type="submit" class="btn-primary">Guardar boleta</button>
+      <button type="submit" class="btn-primary px-6">Guardar boleta</button>
       <a href="{% url 'boletas:lista' %}" class="btn-secondary">Cancelar</a>
     </div>
   </form>
 </div>
 
 <script>
-  document.getElementById('add-item').addEventListener('click', function() {
-    const container = document.getElementById('items-container');
-    const totalForms = document.getElementById('id_items-TOTAL_FORMS');
-    const formIndex = parseInt(totalForms.value);
+(function () {
+  const container = document.getElementById('items-container');
+  const totalFormsInput = document.getElementById('id_items-TOTAL_FORMS');
+
+  function fmt(n) {
+    return '$' + Math.round(n).toLocaleString('es-CL');
+  }
+
+  function calcRow(row) {
+    const cant = parseFloat(row.querySelector('.cantidad-field').value) || 0;
+    const precio = parseFloat(row.querySelector('.precio-field').value) || 0;
+    const sub = cant * precio;
+    row.querySelector('.subtotal-display').textContent = fmt(sub);
+    return sub;
+  }
+
+  function calcTotals() {
+    let subtotal = 0;
+    container.querySelectorAll('.item-row').forEach(row => {
+      const deleteCheckbox = row.querySelector('input[type="checkbox"]');
+      if (!deleteCheckbox || !deleteCheckbox.checked) {
+        subtotal += calcRow(row);
+      }
+    });
+    const iva = Math.round(subtotal * 0.19);
+    const total = subtotal + iva;
+    document.getElementById('resumen-subtotal').textContent = fmt(subtotal);
+    document.getElementById('resumen-iva').textContent = fmt(iva);
+    document.getElementById('resumen-total').textContent = fmt(total);
+  }
+
+  function attachListeners(row) {
+    row.querySelectorAll('.cantidad-field, .precio-field').forEach(input => {
+      input.addEventListener('input', calcTotals);
+    });
+    const del = row.querySelector('input[type="checkbox"]');
+    if (del) del.addEventListener('change', function () {
+      row.style.opacity = this.checked ? '0.35' : '1';
+      calcTotals();
+    });
+  }
+
+  function cloneRow() {
+    const formIndex = parseInt(totalFormsInput.value);
     const firstRow = container.querySelector('.item-row');
     if (!firstRow) return;
     const newRow = firstRow.cloneNode(true);
-    newRow.innerHTML = newRow.innerHTML.replace(/items-\d+-/g, `items-${formIndex}-`);
-    newRow.querySelectorAll('input, select, textarea').forEach(el => {
-      if (el.type !== 'hidden' || el.name.includes('DELETE')) el.value = '';
+
+    newRow.innerHTML = newRow.innerHTML
+      .replace(/items-\d+-/g, `items-${formIndex}-`)
+      .replace(/id_items-\d+-/g, `id_items-${formIndex}-`);
+
+    // Limpiar valores del clon
+    newRow.querySelectorAll('input[type="text"], input[type="number"]').forEach(el => {
+      if (!el.name.endsWith('-id')) el.value = '';
     });
+    newRow.querySelectorAll('input[type="checkbox"]').forEach(el => {
+      el.checked = false;
+    });
+    newRow.querySelector('.subtotal-display').textContent = '$0';
+    newRow.style.opacity = '1';
+
     container.appendChild(newRow);
-    totalForms.value = formIndex + 1;
+    totalFormsInput.value = formIndex + 1;
+    attachListeners(newRow);
+    calcTotals();
+  }
+
+  // Init
+  container.querySelectorAll('.item-row').forEach(row => {
+    attachListeners(row);
+    calcRow(row);
   });
+  calcTotals();
+
+  document.getElementById('add-item').addEventListener('click', cloneRow);
+})();
 </script>
 {% endblock %}
