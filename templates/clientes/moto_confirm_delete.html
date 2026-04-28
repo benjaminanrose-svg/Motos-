@@ -1,0 +1,30 @@
+{% extends "base_admin.html" %}
+{% block title %}Eliminar Moto — {{ taller.nombre|default:"MotoTaller" }}{% endblock %}
+{% block page_title %}Eliminar Moto{% endblock %}
+
+{% block page_content %}
+<div class="max-w-md">
+  <div class="bg-gray-900 border border-red-800/40 rounded-2xl p-6">
+    <div class="flex items-start gap-4">
+      <div class="w-10 h-10 bg-red-900/30 rounded-xl flex items-center justify-center shrink-0">
+        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+        </svg>
+      </div>
+      <div>
+        <h2 class="font-semibold text-white mb-1">¿Eliminar esta moto?</h2>
+        <p class="text-gray-400 text-sm mb-4">
+          <strong class="text-white">{{ object.marca }} {{ object.modelo }} ({{ object.anio }})</strong>
+          será eliminada permanentemente. Los datos del historial en boletas se conservan.
+        </p>
+        <form method="post" class="flex gap-3">
+          {% csrf_token %}
+          <button type="submit" class="btn-danger">Sí, eliminar</button>
+          <a href="{% url 'clientes:detalle' object.cliente_id %}" class="btn-secondary">Cancelar</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

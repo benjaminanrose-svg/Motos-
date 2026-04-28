@@ -1,61 +1,117 @@
 {% extends "base_admin.html" %}
-{% block title %}{{ cliente.nombre }} — MotoTaller{% endblock %}
+{% block title %}{{ cliente.nombre }} — {{ taller.nombre|default:"MotoTaller" }}{% endblock %}
 {% block page_title %}{{ cliente.nombre }}{% endblock %}
+{% block breadcrumb %}
+  / <a href="{% url 'clientes:lista' %}" class="hover:text-gray-200">Clientes</a>
+  / <span class="text-gray-200">{{ cliente.nombre }}</span>
+{% endblock %}
 
 {% block page_content %}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
   <!-- Datos del cliente -->
-  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-    <div class="flex items-center justify-between mb-5">
-      <h2 class="font-semibold">Datos del cliente</h2>
-      <a href="{% url 'clientes:editar' cliente.pk %}" class="text-xs text-red-400 hover:text-red-300">Editar</a>
+  <div class="space-y-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-semibold text-sm">Datos del cliente</h2>
+        <a href="{% url 'clientes:editar' cliente.pk %}" class="text-xs text-red-400 hover:text-red-300">Editar</a>
+      </div>
+      <dl class="space-y-3 text-sm">
+        <div>
+          <dt class="text-gray-500 text-xs uppercase mb-0.5">RUT</dt>
+          <dd class="text-white">{{ cliente.rut }}</dd>
+        </div>
+        <div>
+          <dt class="text-gray-500 text-xs uppercase mb-0.5">Teléfono</dt>
+          <dd class="text-white">{{ cliente.telefono|default:"—" }}</dd>
+        </div>
+        <div>
+          <dt class="text-gray-500 text-xs uppercase mb-0.5">Correo</dt>
+          <dd class="text-white">{{ cliente.correo|default:"—" }}</dd>
+        </div>
+        <div>
+          <dt class="text-gray-500 text-xs uppercase mb-0.5">Dirección</dt>
+          <dd class="text-white">{{ cliente.direccion|default:"—" }}</dd>
+        </div>
+        <div>
+          <dt class="text-gray-500 text-xs uppercase mb-0.5">Cliente desde</dt>
+          <dd class="text-white">{{ cliente.creado|date:"d/m/Y" }}</dd>
+        </div>
+      </dl>
     </div>
-    <dl class="space-y-3 text-sm">
-      <div><dt class="text-gray-500 text-xs uppercase">RUT</dt><dd class="text-white mt-0.5">{{ cliente.rut }}</dd></div>
-      <div><dt class="text-gray-500 text-xs uppercase">Teléfono</dt><dd class="text-white mt-0.5">{{ cliente.telefono|default:"—" }}</dd></div>
-      <div><dt class="text-gray-500 text-xs uppercase">Correo</dt><dd class="text-white mt-0.5">{{ cliente.correo|default:"—" }}</dd></div>
-      <div><dt class="text-gray-500 text-xs uppercase">Dirección</dt><dd class="text-white mt-0.5">{{ cliente.direccion|default:"—" }}</dd></div>
-      <div><dt class="text-gray-500 text-xs uppercase">Cliente desde</dt><dd class="text-white mt-0.5">{{ cliente.creado|date:"d/m/Y" }}</dd></div>
-    </dl>
+
+    <!-- Motos del cliente -->
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold text-sm">Motos ({{ cliente.motos.count }})</h2>
+        <a href="{% url 'clientes:moto_crear' cliente.pk %}" class="text-xs text-red-400 hover:text-red-300">+ Agregar</a>
+      </div>
+      {% for moto in cliente.motos.all %}
+      <div class="py-3 {% if not forloop.last %}border-b border-gray-800{% endif %}">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-white text-sm font-medium">{{ moto.marca }} {{ moto.modelo }}</p>
+            <p class="text-gray-500 text-xs mt-0.5">
+              {{ moto.anio }}
+              {% if moto.placa %} · {{ moto.placa }}{% endif %}
+              {% if moto.color %} · {{ moto.color }}{% endif %}
+            </p>
+            {% if moto.km_actual %}
+            <p class="text-gray-600 text-xs mt-0.5">{{ moto.km_actual|floatformat:0 }} km</p>
+            {% endif %}
+          </div>
+          <div class="flex items-center gap-2 ml-2 shrink-0">
+            <a href="{% url 'clientes:moto_editar' moto.pk %}" class="text-xs text-gray-500 hover:text-gray-300">Editar</a>
+            <form method="post" action="{% url 'clientes:moto_eliminar' moto.pk %}" class="inline">
+              {% csrf_token %}
+              <button type="submit" class="text-xs text-gray-600 hover:text-red-400 transition"
+                data-confirm="¿Eliminar esta moto? Se perderán sus datos.">
+                ✕
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-gray-600 text-xs">Sin motos registradas.</p>
+      {% endfor %}
+    </div>
   </div>
 
   <!-- Historial de boletas -->
-  <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl p-6">
-    <div class="flex items-center justify-between mb-5">
-      <h2 class="font-semibold">Boletas</h2>
+  <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+    <div class="px-5 py-3.5 border-b border-gray-800 flex items-center justify-between">
+      <h2 class="font-semibold text-sm">Historial de boletas</h2>
       <a href="{% url 'boletas:crear' %}?cliente={{ cliente.pk }}" class="btn-primary text-xs py-1.5">+ Nueva boleta</a>
     </div>
     <table class="w-full text-sm">
       <thead>
         <tr class="border-b border-gray-800 text-xs text-gray-500 uppercase">
-          <th class="pb-2 text-left">Nº</th>
-          <th class="pb-2 text-left">Fecha</th>
-          <th class="pb-2 text-left">Estado</th>
-          <th class="pb-2 text-right">Total</th>
-          <th class="pb-2"></th>
+          <th class="px-5 py-3 text-left">Nº</th>
+          <th class="px-5 py-3 text-left">Fecha</th>
+          <th class="px-5 py-3 text-left">Moto</th>
+          <th class="px-5 py-3 text-left">Estado</th>
+          <th class="px-5 py-3 text-right">Total</th>
+          <th class="px-5 py-3"></th>
         </tr>
       </thead>
       <tbody>
         {% for boleta in cliente.boletas.all %}
-        <tr class="border-b border-gray-800 hover:bg-gray-800/50">
-          <td class="py-2.5 text-white">#{{ boleta.numero }}</td>
-          <td class="py-2.5 text-gray-400">{{ boleta.fecha_emision|date:"d/m/Y" }}</td>
-          <td class="py-2.5">
-            <span class="text-xs px-2 py-0.5 rounded-full
-              {% if boleta.estado == 'pagada' %}bg-green-900 text-green-400
-              {% elif boleta.estado == 'emitida' %}bg-blue-900 text-blue-400
-              {% elif boleta.estado == 'anulada' %}bg-red-900 text-red-400
-              {% else %}bg-gray-800 text-gray-400{% endif %}">
-              {{ boleta.get_estado_display }}
-            </span>
+        <tr class="border-b border-gray-800 hover:bg-gray-800/40 transition">
+          <td class="px-5 py-2.5 font-semibold text-white">#{{ boleta.numero }}</td>
+          <td class="px-5 py-2.5 text-gray-400 text-xs tabular">{{ boleta.fecha_emision|date:"d/m/Y" }}</td>
+          <td class="px-5 py-2.5 text-gray-400 text-xs">
+            {% if boleta.moto %}{{ boleta.moto.marca }} {{ boleta.moto.modelo }}{% else %}—{% endif %}
           </td>
-          <td class="py-2.5 text-right font-semibold text-green-400">${{ boleta.total|floatformat:0 }}</td>
-          <td class="py-2.5 text-right">
-            <a href="{% url 'boletas:detalle' boleta.pk %}" class="text-xs text-red-400 hover:text-red-300">Ver</a>
+          <td class="px-5 py-2.5">
+            <span class="badge badge-{{ boleta.estado }}">{{ boleta.get_estado_display }}</span>
+          </td>
+          <td class="px-5 py-2.5 text-right font-semibold text-green-400 tabular">${{ boleta.total|floatformat:0 }}</td>
+          <td class="px-5 py-2.5 text-right">
+            <a href="{% url 'boletas:detalle' boleta.pk %}" class="text-xs text-red-400 hover:text-red-300">Ver →</a>
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="py-8 text-center text-gray-500">Sin boletas</td></tr>
+        <tr><td colspan="6" class="py-12 text-center text-gray-600 text-xs">Sin boletas aún</td></tr>
         {% endfor %}
       </tbody>
     </table>

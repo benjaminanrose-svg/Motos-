@@ -1,6 +1,10 @@
 {% extends "base_admin.html" %}
-{% block title %}{% if object %}Editar Boleta #{{ object.numero }}{% else %}Nueva Boleta{% endif %} — MotoTaller{% endblock %}
+{% block title %}{% if object %}Editar Boleta #{{ object.numero }}{% else %}Nueva Boleta{% endif %} — {{ taller.nombre|default:"MotoTaller" }}{% endblock %}
 {% block page_title %}{% if object %}Editar Boleta #{{ object.numero }}{% else %}Nueva Boleta{% endif %}{% endblock %}
+{% block breadcrumb %}
+  / <a href="{% url 'boletas:lista' %}" class="hover:text-gray-200">Boletas</a>
+  / <span class="text-gray-200">{% if object %}Editar #{{ object.numero }}{% else %}Nueva{% endif %}</span>
+{% endblock %}
 
 {% block page_content %}
 <div class="max-w-4xl">
@@ -9,20 +13,29 @@
 
     <!-- Datos generales -->
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-5">
-      <h2 class="font-semibold mb-4 text-gray-200">Datos generales</h2>
+      <h2 class="font-semibold text-sm mb-4 text-gray-200">Datos generales</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-400 mb-1.5">{{ form.cliente.label }}</label>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">{{ form.cliente.label }} *</label>
           {{ form.cliente }}
           {% if form.cliente.errors %}<p class="text-red-400 text-xs mt-1">{{ form.cliente.errors|join:", " }}</p>{% endif %}
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-400 mb-1.5">{{ form.estado.label }}</label>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Moto del cliente</label>
+          <select name="{{ form.moto.html_name }}" id="{{ form.moto.auto_id }}" class="input-field">
+            <option value="">— Sin moto asociada —</option>
+            {% if object and object.moto %}
+            <option value="{{ object.moto.pk }}" selected>{{ object.moto }}</option>
+            {% endif %}
+          </select>
+          <p id="moto-hint" class="text-xs text-gray-600 mt-1">Selecciona un cliente primero.</p>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">{{ form.estado.label }}</label>
           {{ form.estado }}
-          {% if form.estado.errors %}<p class="text-red-400 text-xs mt-1">{{ form.estado.errors|join:", " }}</p>{% endif %}
         </div>
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-400 mb-1.5">{{ form.observaciones.label }}</label>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">{{ form.observaciones.label }}</label>
           {{ form.observaciones }}
         </div>
       </div>
@@ -30,10 +43,9 @@
 
     <!-- Ítems -->
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-5">
-      <h2 class="font-semibold mb-4 text-gray-200">Ítems de la boleta</h2>
+      <h2 class="font-semibold text-sm mb-4 text-gray-200">Ítems de la boleta</h2>
       {{ formset.management_form }}
 
-      <!-- Cabecera de la tabla -->
       <div class="hidden md:grid grid-cols-12 gap-2 mb-2 px-1">
         <div class="col-span-2 text-xs text-gray-500 uppercase">Tipo</div>
         <div class="col-span-4 text-xs text-gray-500 uppercase">Descripción</div>
@@ -92,15 +104,15 @@
       <dl class="space-y-2 text-sm">
         <div class="flex justify-between text-gray-400">
           <dt>Subtotal neto</dt>
-          <dd id="resumen-subtotal" class="font-medium text-white">$0</dd>
+          <dd id="resumen-subtotal" class="font-medium text-white tabular">$0</dd>
         </div>
         <div class="flex justify-between text-gray-400">
           <dt>IVA (19%)</dt>
-          <dd id="resumen-iva" class="font-medium text-white">$0</dd>
+          <dd id="resumen-iva" class="font-medium text-white tabular">$0</dd>
         </div>
         <div class="flex justify-between pt-2 border-t border-gray-700 font-bold text-base">
           <dt class="text-white">Total</dt>
-          <dd id="resumen-total" class="text-green-400">$0</dd>
+          <dd id="resumen-total" class="text-green-400 tabular">$0</dd>
         </div>
       </dl>
     </div>
@@ -111,9 +123,48 @@
     </div>
   </form>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
 (function () {
+  const clienteSelect = document.getElementById('{{ form.cliente.auto_id }}');
+  const motoSelect = document.getElementById('{{ form.moto.auto_id }}');
+  const motoHint = document.getElementById('moto-hint');
+
+  function loadMotos(clienteId, selectedId) {
+    if (!clienteId) {
+      motoSelect.innerHTML = '<option value="">— Sin moto asociada —</option>';
+      motoHint.textContent = 'Selecciona un cliente primero.';
+      return;
+    }
+    fetch(`/clientes/api/${clienteId}/motos/`)
+      .then(r => r.json())
+      .then(data => {
+        motoSelect.innerHTML = '<option value="">— Sin moto asociada —</option>';
+        data.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = `${m.marca} ${m.modelo} (${m.anio})${m.placa ? ' · ' + m.placa : ''}`;
+          if (m.id == selectedId) opt.selected = true;
+          motoSelect.appendChild(opt);
+        });
+        motoHint.textContent = data.length ? '' : 'Este cliente no tiene motos registradas.';
+      })
+      .catch(() => { motoHint.textContent = 'Error al cargar motos.'; });
+  }
+
+  if (clienteSelect) {
+    clienteSelect.addEventListener('change', function () {
+      loadMotos(this.value, null);
+    });
+    // Auto-load on page open if a client is already selected
+    if (clienteSelect.value) {
+      loadMotos(clienteSelect.value, '{{ object.moto_id|default:"" }}');
+    }
+  }
+
+  // ─── Ítems & Totales ───────────────────────────────────────────────
   const container = document.getElementById('items-container');
   const totalFormsInput = document.getElementById('id_items-TOTAL_FORMS');
 
@@ -132,16 +183,13 @@
   function calcTotals() {
     let subtotal = 0;
     container.querySelectorAll('.item-row').forEach(row => {
-      const deleteCheckbox = row.querySelector('input[type="checkbox"]');
-      if (!deleteCheckbox || !deleteCheckbox.checked) {
-        subtotal += calcRow(row);
-      }
+      const del = row.querySelector('input[type="checkbox"]');
+      if (!del || !del.checked) subtotal += calcRow(row);
     });
     const iva = Math.round(subtotal * 0.19);
-    const total = subtotal + iva;
     document.getElementById('resumen-subtotal').textContent = fmt(subtotal);
     document.getElementById('resumen-iva').textContent = fmt(iva);
-    document.getElementById('resumen-total').textContent = fmt(total);
+    document.getElementById('resumen-total').textContent = fmt(subtotal + iva);
   }
 
   function attachListeners(row) {
@@ -156,32 +204,25 @@
   }
 
   function cloneRow() {
-    const formIndex = parseInt(totalFormsInput.value);
+    const idx = parseInt(totalFormsInput.value);
     const firstRow = container.querySelector('.item-row');
     if (!firstRow) return;
     const newRow = firstRow.cloneNode(true);
-
     newRow.innerHTML = newRow.innerHTML
-      .replace(/items-\d+-/g, `items-${formIndex}-`)
-      .replace(/id_items-\d+-/g, `id_items-${formIndex}-`);
-
-    // Limpiar valores del clon
+      .replace(/items-\d+-/g, `items-${idx}-`)
+      .replace(/id_items-\d+-/g, `id_items-${idx}-`);
     newRow.querySelectorAll('input[type="text"], input[type="number"]').forEach(el => {
       if (!el.name.endsWith('-id')) el.value = '';
     });
-    newRow.querySelectorAll('input[type="checkbox"]').forEach(el => {
-      el.checked = false;
-    });
+    newRow.querySelectorAll('input[type="checkbox"]').forEach(el => { el.checked = false; });
     newRow.querySelector('.subtotal-display').textContent = '$0';
     newRow.style.opacity = '1';
-
     container.appendChild(newRow);
-    totalFormsInput.value = formIndex + 1;
+    totalFormsInput.value = idx + 1;
     attachListeners(newRow);
     calcTotals();
   }
 
-  // Init
   container.querySelectorAll('.item-row').forEach(row => {
     attachListeners(row);
     calcRow(row);

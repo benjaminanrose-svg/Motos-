@@ -1,0 +1,61 @@
+{% extends "base_admin.html" %}
+{% block title %}{% if object %}Editar Moto{% else %}Nueva Moto{% endif %} — {{ taller.nombre|default:"MotoTaller" }}{% endblock %}
+{% block page_title %}{% if object %}Editar Moto{% else %}Nueva Moto{% endif %}{% endblock %}
+{% block breadcrumb %}
+  / <a href="{% url 'clientes:lista' %}" class="hover:text-gray-200">Clientes</a>
+  / <a href="{% url 'clientes:detalle' cliente.pk %}" class="hover:text-gray-200">{{ cliente.nombre }}</a>
+  / <span class="text-gray-200">{% if object %}Editar moto{% else %}Nueva moto{% endif %}</span>
+{% endblock %}
+
+{% block page_content %}
+<div class="max-w-xl">
+  <form method="post">
+    {% csrf_token %}
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-5">
+      <h2 class="font-semibold text-sm mb-4 text-gray-200">Datos de la moto</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Marca *</label>
+          {{ form.marca }}
+          {% if form.marca.errors %}<p class="text-red-400 text-xs mt-1">{{ form.marca.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Modelo *</label>
+          {{ form.modelo }}
+          {% if form.modelo.errors %}<p class="text-red-400 text-xs mt-1">{{ form.modelo.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Año *</label>
+          {{ form.anio }}
+          {% if form.anio.errors %}<p class="text-red-400 text-xs mt-1">{{ form.anio.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Patente</label>
+          {{ form.placa }}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Color</label>
+          {{ form.color }}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">VIN / Nº Motor</label>
+          {{ form.vin }}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Kilometraje actual</label>
+          {{ form.km_actual }}
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Observaciones</label>
+          {{ form.observaciones }}
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-3">
+      <button type="submit" class="btn-primary px-6">Guardar moto</button>
+      <a href="{% url 'clientes:detalle' cliente.pk %}" class="btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

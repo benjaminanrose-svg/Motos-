@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import Sum
-from apps.clientes.models import Cliente
+from apps.clientes.models import Cliente, Moto
 
 
 class Boleta(models.Model):
@@ -13,6 +13,7 @@ class Boleta(models.Model):
 
     numero = models.PositiveIntegerField(unique=True)
     cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT, related_name='boletas')
+    moto = models.ForeignKey(Moto, on_delete=models.SET_NULL, null=True, blank=True, related_name='boletas')
     fecha_emision = models.DateField(auto_now_add=True)
     estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='borrador')
     observaciones = models.TextField(blank=True)
@@ -25,7 +26,7 @@ class Boleta(models.Model):
         verbose_name_plural = 'Boletas'
 
     def __str__(self):
-        return f'Boleta #{self.numero} - {self.cliente.nombre}'
+        return f'Boleta #{self.numero} — {self.cliente.nombre}'
 
     @property
     def subtotal(self):
@@ -38,6 +39,12 @@ class Boleta(models.Model):
     @property
     def total(self):
         return self.subtotal + self.iva
+
+    def marcar_pagada(self):
+        """Cambia estado a pagada. El signal se encarga de crear el movimiento en caja."""
+        if self.estado not in ('pagada', 'anulada'):
+            self.estado = 'pagada'
+            self.save()
 
 
 class ItemBoleta(models.Model):

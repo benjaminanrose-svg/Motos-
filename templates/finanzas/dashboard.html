@@ -1,75 +1,152 @@
 {% extends "base_admin.html" %}
-{% block title %}Finanzas — MotoTaller{% endblock %}
+{% block title %}Finanzas — {{ taller.nombre|default:"MotoTaller" }}{% endblock %}
 {% block page_title %}Finanzas{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
 
 {% block page_content %}
-<!-- Tarjetas resumen del mes -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+<!-- Filtro de rango -->
+<div class="flex items-center gap-2 mb-6">
+  {% for r, label in rango_opciones %}
+  <a href="?rango={{ r }}"
+     class="px-3 py-1.5 rounded-lg text-xs font-medium transition
+     {% if rango == r %}bg-red-700 text-white{% else %}bg-gray-800 text-gray-400 hover:bg-gray-700{% endif %}">
+    {{ label }}
+  </a>
+  {% endfor %}
+  <span class="text-xs text-gray-600 ml-2">{{ fecha_desde|date:"d/m/Y" }} — {{ fecha_hasta|date:"d/m/Y" }}</span>
+</div>
+
+<!-- KPIs del período -->
+<div class="grid grid-cols-3 gap-4 mb-6">
   <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-    <p class="text-xs text-gray-500 uppercase tracking-wider mb-2">Ingresos del mes</p>
-    <p class="text-3xl font-bold text-green-400">${{ ingresos_mes|floatformat:0 }}</p>
+    <p class="text-xs text-gray-500 uppercase mb-1">Ingresos</p>
+    <p class="text-2xl font-bold text-green-400 tabular">${{ ingresos_periodo|floatformat:0 }}</p>
   </div>
   <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-    <p class="text-xs text-gray-500 uppercase tracking-wider mb-2">Egresos del mes</p>
-    <p class="text-3xl font-bold text-red-400">${{ egresos_mes|floatformat:0 }}</p>
+    <p class="text-xs text-gray-500 uppercase mb-1">Egresos</p>
+    <p class="text-2xl font-bold text-red-400 tabular">${{ egresos_periodo|floatformat:0 }}</p>
   </div>
-  <div class="bg-gray-900 border {% if balance_mes >= 0 %}border-green-800{% else %}border-red-800{% endif %} rounded-2xl p-5">
-    <p class="text-xs text-gray-500 uppercase tracking-wider mb-2">Balance del mes</p>
-    <p class="text-3xl font-bold {% if balance_mes >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
-      ${{ balance_mes|floatformat:0 }}
+  <div class="bg-gray-900 border {% if balance_periodo >= 0 %}border-green-800/40{% else %}border-red-800/40{% endif %} rounded-2xl p-5">
+    <p class="text-xs text-gray-500 uppercase mb-1">Balance</p>
+    <p class="text-2xl font-bold tabular {% if balance_periodo >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+      ${{ balance_periodo|floatformat:0 }}
     </p>
   </div>
 </div>
 
-<!-- Resumen del año -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-  <div class="bg-gray-900/50 border border-gray-800 rounded-2xl p-5">
-    <p class="text-xs text-gray-500 uppercase mb-2">Ingresos {{ año_actual }}</p>
-    <p class="text-2xl font-bold text-green-400">${{ ingresos_año|floatformat:0 }}</p>
+<!-- Gráfico 12 meses + resumen año -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
+  <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl p-5">
+    <h2 class="font-semibold text-sm mb-4">Ingresos vs Egresos — últimos 12 meses</h2>
+    <canvas id="finChart" height="220"></canvas>
   </div>
-  <div class="bg-gray-900/50 border border-gray-800 rounded-2xl p-5">
-    <p class="text-xs text-gray-500 uppercase mb-2">Egresos {{ año_actual }}</p>
-    <p class="text-2xl font-bold text-red-400">${{ egresos_año|floatformat:0 }}</p>
-  </div>
-  <div class="bg-gray-900/50 border border-gray-800 rounded-2xl p-5">
-    <p class="text-xs text-gray-500 uppercase mb-2">Balance {{ año_actual }}</p>
-    <p class="text-2xl font-bold {% if balance_año >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
-      ${{ balance_año|floatformat:0 }}
-    </p>
-  </div>
-</div>
-
-<!-- Gráfico últimos 6 meses -->
-<div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-  <h2 class="font-semibold mb-6">Ingresos vs Egresos — Últimos 6 meses</h2>
-  <div class="overflow-x-auto">
-    <div class="min-w-[500px]">
-      {% for dato in datos_meses %}
-      {% with max_val=ingresos_año %}
-      <div class="flex items-center gap-4 mb-3">
-        <span class="text-xs text-gray-400 w-20 shrink-0 text-right">{{ dato.mes }}</span>
-        <div class="flex-1 flex flex-col gap-1">
-          <!-- Ingresos -->
-          <div class="flex items-center gap-2">
-            <div class="h-4 bg-green-600 rounded-r min-w-[4px]"
-              style="width: {% widthratio dato.ingresos 1000000 100 %}%; max-width:100%"></div>
-            <span class="text-xs text-green-400 shrink-0">${{ dato.ingresos|floatformat:0 }}</span>
-          </div>
-          <!-- Egresos -->
-          <div class="flex items-center gap-2">
-            <div class="h-4 bg-red-600 rounded-r min-w-[4px]"
-              style="width: {% widthratio dato.egresos 1000000 100 %}%; max-width:100%"></div>
-            <span class="text-xs text-red-400 shrink-0">${{ dato.egresos|floatformat:0 }}</span>
-          </div>
-        </div>
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+    <h2 class="font-semibold text-sm mb-4">Resumen {{ año_actual }}</h2>
+    <dl class="space-y-3">
+      <div class="flex justify-between text-sm">
+        <dt class="text-gray-400">Ingresos totales</dt>
+        <dd class="font-semibold text-green-400 tabular">${{ ingresos_año|floatformat:0 }}</dd>
       </div>
-      {% endwith %}
-      {% endfor %}
+      <div class="flex justify-between text-sm">
+        <dt class="text-gray-400">Egresos totales</dt>
+        <dd class="font-semibold text-red-400 tabular">${{ egresos_año|floatformat:0 }}</dd>
+      </div>
+      <div class="flex justify-between text-sm pt-3 border-t border-gray-800 font-bold">
+        <dt class="text-white">Balance {{ año_actual }}</dt>
+        <dd class="tabular {% if balance_año >= 0 %}text-green-400{% else %}text-red-400{% endif %}">${{ balance_año|floatformat:0 }}</dd>
+      </div>
+    </dl>
+    <div class="mt-6 pt-4 border-t border-gray-800">
+      <a href="{% url 'boletas:csv' %}" class="btn-secondary w-full justify-center text-xs">
+        ↓ Exportar boletas CSV
+      </a>
     </div>
   </div>
-  <div class="flex items-center gap-4 mt-4 text-xs text-gray-500">
-    <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-green-600 rounded-sm"></span>Ingresos</span>
-    <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-red-600 rounded-sm"></span>Egresos</span>
-  </div>
 </div>
+
+<!-- Últimos movimientos -->
+<div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+  <div class="px-5 py-3.5 border-b border-gray-800">
+    <h2 class="font-semibold text-sm">Movimientos del período</h2>
+  </div>
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b border-gray-800 text-xs text-gray-500 uppercase">
+        <th class="px-5 py-3 text-left">Fecha</th>
+        <th class="px-5 py-3 text-left">Descripción</th>
+        <th class="px-5 py-3 text-left">Tipo</th>
+        <th class="px-5 py-3 text-right">Monto</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for mov in ultimos_movimientos %}
+      <tr class="border-b border-gray-800 hover:bg-gray-800/40 transition">
+        <td class="px-5 py-2.5 text-gray-400 tabular text-xs">{{ mov.hora|date:"d/m/Y H:i" }}</td>
+        <td class="px-5 py-2.5 text-white text-xs">{{ mov.descripcion }}</td>
+        <td class="px-5 py-2.5">
+          <span class="badge badge-{% if mov.tipo == 'ingreso' %}pagada{% elif mov.tipo == 'egreso' %}anulada{% else %}emitida{% endif %}">
+            {{ mov.get_tipo_display }}
+          </span>
+        </td>
+        <td class="px-5 py-2.5 text-right font-semibold tabular
+          {% if mov.tipo == 'ingreso' %}text-green-400{% else %}text-red-400{% endif %}">
+          {% if mov.tipo == 'ingreso' %}+{% else %}-{% endif %}${{ mov.monto|floatformat:0 }}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="py-8 text-center text-gray-500 text-xs">Sin movimientos en este período</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ctx = document.getElementById('finChart');
+if (ctx) {
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ chart_labels|safe }},
+      datasets: [
+        {
+          label: 'Ingresos',
+          data: {{ chart_ingresos|safe }},
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34,197,94,.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+        },
+        {
+          label: 'Egresos',
+          data: {{ chart_egresos|safe }},
+          borderColor: '#ef4444',
+          backgroundColor: 'rgba(239,68,68,.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: '#9ca3af', font: { size: 11 } } },
+        tooltip: { callbacks: { label: (c) => ` $${c.raw.toLocaleString('es-CL')}` } }
+      },
+      scales: {
+        x: { ticks: { color: '#6b7280', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+        y: { ticks: { color: '#6b7280', callback: v => '$' + v.toLocaleString('es-CL') }, grid: { color: 'rgba(255,255,255,.04)' } }
+      }
+    }
+  });
+}
+</script>
 {% endblock %}

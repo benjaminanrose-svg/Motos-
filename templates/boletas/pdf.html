@@ -7,14 +7,17 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; font-size: 12px; color: #1a1a1a; padding: 40px; }
     .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 2px solid #e53e3e; padding-bottom: 20px; }
+    .logo { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; margin-right: 12px; }
+    .company-header { display: flex; align-items: flex-start; }
     .company-name { font-size: 22px; font-weight: bold; color: #e53e3e; }
-    .company-info { font-size: 11px; color: #555; margin-top: 4px; }
+    .company-info { font-size: 11px; color: #555; margin-top: 4px; line-height: 1.6; }
     .boleta-info { text-align: right; }
     .boleta-numero { font-size: 20px; font-weight: bold; }
     .boleta-fecha { color: #555; font-size: 11px; margin-top: 4px; }
     .section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 5px; }
     .cliente-box { background: #f8f8f8; padding: 12px; border-radius: 6px; margin-bottom: 25px; }
     .cliente-nombre { font-weight: bold; font-size: 13px; }
+    .moto-box { background: #fff8f0; padding: 10px 12px; border-radius: 6px; margin-bottom: 20px; border-left: 3px solid #e67e22; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
     thead { background: #1a202c; color: white; }
     th { padding: 8px 12px; text-align: left; font-size: 10px; text-transform: uppercase; }
@@ -28,15 +31,27 @@
     .estado-pagada { background: #c6f6d5; color: #276749; }
     .estado-emitida { background: #bee3f8; color: #2c5282; }
     .estado-borrador { background: #e2e8f0; color: #4a5568; }
+    .estado-anulada { background: #fed7d7; color: #9b2c2c; }
     .observaciones { margin-top: 30px; padding: 10px; background: #f8f8f8; border-left: 3px solid #e53e3e; border-radius: 4px; }
     .footer { margin-top: 40px; text-align: center; color: #aaa; font-size: 10px; border-top: 1px solid #eee; padding-top: 15px; }
   </style>
 </head>
 <body>
   <div class="header">
-    <div>
-      <div class="company-name">MotoTaller</div>
-      <div class="company-info">Av. Principal 1234, Santiago<br>+56 9 1234 5678 | contacto@mototaller.cl</div>
+    <div class="company-header">
+      {% if taller.logo %}
+      <img src="{{ taller.logo.url }}" alt="Logo" class="logo">
+      {% endif %}
+      <div>
+        <div class="company-name">{{ taller.nombre|default:"MotoTaller" }}</div>
+        <div class="company-info">
+          {% if taller.rut %}RUT: {{ taller.rut }}<br>{% endif %}
+          {% if taller.direccion %}{{ taller.direccion }}<br>{% endif %}
+          {% if taller.telefono %}Tel: {{ taller.telefono }}{% if taller.email %} | {% endif %}{% endif %}
+          {% if taller.email %}{{ taller.email }}{% endif %}
+          {% if taller.horario %}<br>{{ taller.horario }}{% endif %}
+        </div>
+      </div>
     </div>
     <div class="boleta-info">
       <div class="boleta-numero">Boleta #{{ boleta.numero }}</div>
@@ -55,7 +70,20 @@
       {% if boleta.cliente.telefono %} | Tel: {{ boleta.cliente.telefono }}{% endif %}
       {% if boleta.cliente.correo %} | {{ boleta.cliente.correo }}{% endif %}
     </div>
+    {% if boleta.cliente.direccion %}
+    <div style="color:#888; margin-top:2px; font-size:11px">{{ boleta.cliente.direccion }}</div>
+    {% endif %}
   </div>
+
+  {% if boleta.moto %}
+  <div class="moto-box">
+    <div class="section-title">Vehículo</div>
+    <strong>{{ boleta.moto.marca }} {{ boleta.moto.modelo }} {{ boleta.moto.anio }}</strong>
+    {% if boleta.moto.placa %} — Patente: {{ boleta.moto.placa }}{% endif %}
+    {% if boleta.moto.color %} — {{ boleta.moto.color }}{% endif %}
+    {% if boleta.moto.vin %}<br><span style="color:#888; font-size:11px">VIN/Motor: {{ boleta.moto.vin }}</span>{% endif %}
+  </div>
+  {% endif %}
 
   <table>
     <thead>
@@ -95,7 +123,8 @@
   {% endif %}
 
   <div class="footer">
-    Documento generado el {% now "d/m/Y H:i" %} | MotoTaller
+    {% if taller.mensaje_pie_boleta %}{{ taller.mensaje_pie_boleta }}<br>{% endif %}
+    Documento generado el {% now "d/m/Y H:i" %} | {{ taller.nombre|default:"MotoTaller" }}
   </div>
 </body>
 </html>

@@ -1,0 +1,76 @@
+{% extends "base_admin.html" %}
+{% block title %}Configuración — {{ taller.nombre|default:"MotoTaller" }}{% endblock %}
+{% block page_title %}Configuración del Taller{% endblock %}
+{% block breadcrumb %} / <span class="text-gray-200">Configuración</span>{% endblock %}
+
+{% block page_content %}
+<form method="post" enctype="multipart/form-data" class="max-w-2xl">
+  {% csrf_token %}
+
+  <!-- Datos principales -->
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-5">
+    <h2 class="font-semibold text-sm mb-4 text-gray-200">Datos del Taller</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="md:col-span-2">
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Nombre del taller *</label>
+        {{ form.nombre }}
+        {% if form.nombre.errors %}<p class="text-red-400 text-xs mt-1">{{ form.nombre.errors|join:", " }}</p>{% endif %}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">RUT</label>
+        {{ form.rut }}
+        {% if form.rut.errors %}<p class="text-red-400 text-xs mt-1">{{ form.rut.errors|join:", " }}</p>{% endif %}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Teléfono</label>
+        {{ form.telefono }}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}<p class="text-red-400 text-xs mt-1">{{ form.email.errors|join:", " }}</p>{% endif %}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Horario de atención</label>
+        {{ form.horario }}
+      </div>
+      <div class="md:col-span-2">
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Dirección</label>
+        {{ form.direccion }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Boletas y documentos -->
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-5">
+    <h2 class="font-semibold text-sm mb-4 text-gray-200">Documentos y Pie de Boleta</h2>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">Mensaje al pie de cada boleta</label>
+        {{ form.mensaje_pie_boleta }}
+        <p class="text-xs text-gray-600 mt-1">Aparecerá al final de todos los PDFs generados.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logo -->
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-5">
+    <h2 class="font-semibold text-sm mb-4 text-gray-200">Logo</h2>
+    {% if form.instance.logo %}
+    <div class="mb-3 flex items-center gap-3">
+      <img src="{{ form.instance.logo.url }}" alt="Logo actual" class="w-16 h-16 rounded-xl object-cover border border-gray-700">
+      <p class="text-xs text-gray-500">Logo actual. Sube uno nuevo para reemplazarlo.</p>
+    </div>
+    {% endif %}
+    <div>
+      <label class="block text-xs font-medium text-gray-400 mb-1.5">Subir logo (PNG, JPG — recomendado 200×200px)</label>
+      {{ form.logo }}
+    </div>
+  </div>
+
+  <div class="flex gap-3">
+    <button type="submit" class="btn-primary px-6">Guardar configuración</button>
+    <a href="{% url 'dashboard' %}" class="btn-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}
