@@ -1,5 +1,5 @@
 {% extends "base_admin.html" %}
-{% block title %}Boleta #{{ boleta.numero }} — {{ taller.nombre|default:"MotoTaller" }}{% endblock %}
+{% block title %}Boleta #{{ boleta.numero }} — {{ taller.nombre|default:"Keloke" }}{% endblock %}
 {% block page_title %}Boleta #{{ boleta.numero }}{% endblock %}
 {% block breadcrumb %}
   / <a href="{% url 'boletas:lista' %}" class="hover:text-gray-200">Boletas</a>

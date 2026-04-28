@@ -3,7 +3,7 @@ from django.db import models
 
 class ConfiguracionTaller(models.Model):
     """Singleton: solo existe un registro con los datos del taller."""
-    nombre = models.CharField(max_length=150, default='MotoTaller')
+    nombre = models.CharField(max_length=150, default='Keloke')
     rut = models.CharField(max_length=15, blank=True)
     direccion = models.CharField(max_length=255, blank=True)
     telefono = models.CharField(max_length=30, blank=True)

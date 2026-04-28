@@ -1,5 +1,5 @@
 {% extends "base_admin.html" %}
-{% block title %}{{ cliente.nombre }} — {{ taller.nombre|default:"MotoTaller" }}{% endblock %}
+{% block title %}{{ cliente.nombre }} — {{ taller.nombre|default:"Keloke" }}{% endblock %}
 {% block page_title %}{{ cliente.nombre }}{% endblock %}
 {% block breadcrumb %}
   / <a href="{% url 'clientes:lista' %}" class="hover:text-gray-200">Clientes</a>

@@ -43,7 +43,7 @@
       <img src="{{ taller.logo.url }}" alt="Logo" class="logo">
       {% endif %}
       <div>
-        <div class="company-name">{{ taller.nombre|default:"MotoTaller" }}</div>
+        <div class="company-name">{{ taller.nombre|default:"Keloke" }}</div>
         <div class="company-info">
           {% if taller.rut %}RUT: {{ taller.rut }}<br>{% endif %}
           {% if taller.direccion %}{{ taller.direccion }}<br>{% endif %}
@@ -124,7 +124,7 @@
 
   <div class="footer">
     {% if taller.mensaje_pie_boleta %}{{ taller.mensaje_pie_boleta }}<br>{% endif %}
-    Documento generado el {% now "d/m/Y H:i" %} | {{ taller.nombre|default:"MotoTaller" }}
+    Documento generado el {% now "d/m/Y H:i" %} | {{ taller.nombre|default:"Keloke" }}
   </div>
 </body>
 </html>

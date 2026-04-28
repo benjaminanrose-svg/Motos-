@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
             name='ConfiguracionTaller',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nombre', models.CharField(default='MotoTaller', max_length=150)),
+                ('nombre', models.CharField(default='Keloke', max_length=150)),
                 ('rut', models.CharField(blank=True, max_length=15)),
                 ('direccion', models.CharField(blank=True, max_length=255)),
                 ('telefono', models.CharField(blank=True, max_length=30)),
