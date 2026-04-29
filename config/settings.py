@@ -8,9 +8,10 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,.railway.app').split(',')
 
-CSRF_TRUSTED_ORIGINS = [
-    f'https://{h}' for h in ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1')
-] + ['http://localhost', 'http://127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1', 'https://*.railway.app']
+_extra_host = config('RAILWAY_PUBLIC_DOMAIN', default=None)
+if _extra_host:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{_extra_host}')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
