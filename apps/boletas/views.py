@@ -7,7 +7,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.contrib import messages
-from weasyprint import HTML
 from .models import Boleta, ItemBoleta
 from .forms import BoletaForm, ItemBoletaFormSet
 
@@ -126,6 +125,7 @@ def boleta_anular(request, pk):
 
 @login_required
 def boleta_pdf(request, pk):
+    from weasyprint import HTML
     boleta = get_object_or_404(
         Boleta.objects.prefetch_related('items').select_related('cliente', 'moto'), pk=pk
     )
