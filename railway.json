@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "python manage.py migrate --no-input && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2",
+    "startCommand": "python manage.py migrate --no-input && python manage.py crear_usuario && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2",
     "healthcheckPath": "/",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3
