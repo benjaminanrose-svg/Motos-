@@ -1,162 +1,722 @@
-{% extends "base_publico.html" %}
-{% block title %}Keloke — Taller de Motos{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% if taller %}{{ taller.nombre }}{% else %}Keloke{% endif %} — Taller Mecánico de Motos</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ── Reset & Base ─────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: #111110; color: #F2EFE8;
+  font-family: 'Barlow', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: inherit; }
 
-{% block content %}
+/* ── Nav ──────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 68px;
+  background: rgba(12,12,11,0.95); backdrop-filter: blur(16px);
+  border-bottom: 1px solid #2A2A28;
+}
+.nav-logo { display: flex; align-items: center; gap: 12px; }
+.nav-logo img { width: 48px; height: 48px; object-fit: contain; border-radius: 4px; }
+.nav-logo-placeholder {
+  width: 48px; height: 48px; background: #CC1414; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 18px; color: #fff;
+}
+.nav-logo-text .brand {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 22px;
+  color: #F2EFE8; line-height: 1; letter-spacing: 0.02em; text-transform: uppercase;
+}
+.nav-logo-text .tagline {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 500; font-size: 10px;
+  color: #CC1414; letter-spacing: 0.18em; text-transform: uppercase;
+}
+.nav-links { display: flex; gap: 32px; }
+.nav-links a {
+  font-size: 13px; font-weight: 500; color: #888884;
+  letter-spacing: 0.03em; transition: color 180ms;
+}
+.nav-links a:hover, .nav-links a.active { color: #F2EFE8; }
+.nav-cta {
+  background: #CC1414; color: #F2EFE8; border: none;
+  padding: 9px 24px; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+  border-radius: 3px; transition: background 180ms;
+}
+.nav-cta:hover { background: #E51818; }
+
+/* ── Hero ─────────────────────────────────────── */
+#hero {
+  position: relative; min-height: 100vh; display: flex; align-items: center;
+  padding: 100px 40px 80px; overflow: hidden;
+}
+.hero-img {
+  position: absolute; inset: 0;
+  background: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80') center/cover no-repeat;
+}
+.hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(100deg, rgba(10,10,9,0.97) 42%, rgba(10,10,9,0.55) 100%);
+}
+.hero-content { position: relative; z-index: 1; max-width: 620px; }
+.hero-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
+.hero-eyebrow-line { width: 28px; height: 2px; background: #CC1414; }
+.hero-eyebrow-text {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase; color: #CC1414;
+}
+.hero-title {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800;
+  font-size: clamp(36px, 4.5vw, 60px); line-height: 1.05;
+  text-transform: uppercase; letter-spacing: -0.01em;
+  color: #F2EFE8; margin-bottom: 32px;
+}
+.hero-title em { color: #CC1414; font-style: normal; }
+.hero-body { font-size: 16px; color: #A09D96; line-height: 1.65; max-width: 460px; margin-bottom: 36px; }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-primary {
+  background: #CC1414; color: #F2EFE8; border: none;
+  padding: 13px 30px; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+  border-radius: 3px; transition: background 180ms, transform 120ms;
+}
+.btn-primary:hover { background: #E51818; }
+.btn-primary:active { transform: scale(0.97); }
+.btn-outline {
+  background: transparent; color: #F2EFE8; border: 1px solid #3A3A38;
+  padding: 13px 30px; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+  border-radius: 3px; transition: border-color 180ms;
+}
+.btn-outline:hover { border-color: #888884; }
+.hero-stats {
+  display: flex; gap: 40px; margin-top: 56px; padding-top: 36px;
+  border-top: 1px solid #2A2A28; flex-wrap: wrap;
+}
+.hero-stat-num {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 34px;
+  color: #F2EFE8; line-height: 1;
+}
+.hero-stat-num span { color: #CC1414; }
+.hero-stat-label { font-size: 11px; color: #5C5A55; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px; }
+
+/* ── Section commons ──────────────────────────── */
+section { padding: 96px 40px; position: relative; z-index: 1; }
+.section-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.section-eyebrow-line { width: 24px; height: 2px; background: #CC1414; }
+.section-eyebrow-text {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase; color: #CC1414;
+}
+.section-title {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 44px;
+  text-transform: uppercase; letter-spacing: -0.01em; line-height: 1;
+  color: #F2EFE8; margin-bottom: 14px;
+}
+.section-body { font-size: 15px; color: #A09D96; line-height: 1.65; max-width: 500px; }
+.section-header { max-width: 1100px; margin: 0 auto 52px; }
+
+/* ── Services ─────────────────────────────────── */
+#servicios { background: #111110; }
+.services-grid {
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+}
+.service-card {
+  background: #181817; border: 1px solid #2A2A28; border-radius: 4px;
+  padding: 26px; transition: border-color 200ms; display: flex; flex-direction: column; gap: 10px;
+}
+.service-card:hover { border-color: #CC1414; }
+.service-icon {
+  width: 38px; height: 38px; background: #222220; border-radius: 3px;
+  display: flex; align-items: center; justify-content: center; color: #CC1414;
+}
+.service-title { font-size: 15px; font-weight: 600; color: #F2EFE8; }
+.service-desc { font-size: 13px; color: #888884; line-height: 1.6; flex: 1; }
+.service-price {
+  font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 500;
+  color: #F2EFE8; margin-top: 4px;
+}
+.service-price span { font-size: 11px; color: #5C5A55; font-weight: 400; margin-left: 2px; }
+
+/* ── About ────────────────────────────────────── */
+#nosotros { background: #151514; border-top: 1px solid #222220; border-bottom: 1px solid #222220; }
+.about-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
+.about-features { display: flex; flex-direction: column; gap: 18px; margin-top: 32px; }
+.about-feature { display: flex; gap: 14px; align-items: flex-start; }
+.about-feature-icon {
+  width: 34px; height: 34px; background: #222220; border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  color: #CC1414; flex-shrink: 0; margin-top: 2px;
+}
+.about-feature-title { font-size: 14px; font-weight: 600; color: #F2EFE8; margin-bottom: 2px; }
+.about-feature-body { font-size: 13px; color: #888884; line-height: 1.55; }
+.about-photos { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 200px 200px; gap: 8px; }
+.about-photo { border-radius: 4px; overflow: hidden; background: #222220; }
+.about-photo img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.7) brightness(0.85); transition: filter 300ms; }
+.about-photo:hover img { filter: saturate(0.9) brightness(1); }
+.about-photo.tall { grid-row: span 2; }
+
+/* ── Pricing ──────────────────────────────────── */
+#precios { background: #111110; }
+.pricing-grid {
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+}
+.pricing-card {
+  background: #181817; border: 1px solid #2A2A28; border-radius: 4px; padding: 30px;
+  display: flex; flex-direction: column; transition: border-color 180ms;
+}
+.pricing-card.featured { border-color: #CC1414; box-shadow: 0 0 28px rgba(204,20,20,0.1); }
+.pricing-tag {
+  background: #CC1414; color: #F2EFE8; display: inline-block;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 2px; margin-bottom: 12px; align-self: flex-start;
+}
+.pricing-name { font-size: 13px; font-weight: 600; color: #888884; text-transform: uppercase; letter-spacing: 0.08em; }
+.pricing-price {
+  font-family: 'JetBrains Mono', monospace; font-size: 30px; font-weight: 500;
+  color: #F2EFE8; margin: 10px 0 6px;
+}
+.pricing-price sub { font-size: 13px; color: #5C5A55; font-weight: 400; }
+.pricing-desc { font-size: 13px; color: #888884; line-height: 1.55; margin-bottom: 16px; }
+.pricing-includes { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.pricing-includes li { font-size: 13px; color: #888884; display: flex; gap: 10px; }
+.pricing-includes li::before { content: '—'; color: #CC1414; flex-shrink: 0; }
+.pricing-btn {
+  margin-top: 24px; width: 100%; padding: 11px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px;
+  border: 1px solid #2A2A28; background: transparent; color: #F2EFE8;
+  transition: border-color 180ms, background 180ms;
+}
+.pricing-btn:hover { border-color: #CC1414; }
+.pricing-card.featured .pricing-btn { background: #CC1414; border-color: #CC1414; }
+.pricing-card.featured .pricing-btn:hover { background: #E51818; }
+
+/* ── Photo band ───────────────────────────────── */
+.photo-band { height: 260px; overflow: hidden; position: relative; z-index: 1; }
+.photo-band img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.5) brightness(0.6); }
+.photo-band-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(17,17,16,0.6) 0%, transparent 40%, transparent 60%, rgba(17,17,16,0.8) 100%);
+}
+.photo-band-text { position: absolute; bottom: 32px; left: 40px; right: 40px; }
+.photo-band-text h3 {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 40px;
+  text-transform: uppercase; color: #F2EFE8; letter-spacing: -0.01em;
+}
+.photo-band-text h3 span { color: #CC1414; }
+
+/* ── Valoraciones ─────────────────────────────── */
+#valoraciones { background: #111110; border-top: 1px solid #222220; }
+
+/* ── Contact ──────────────────────────────────── */
+#contacto { background: #151514; border-top: 1px solid #222220; }
+.contact-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.4fr; gap: 72px; }
+.contact-info { display: flex; flex-direction: column; gap: 24px; }
+.contact-item { display: flex; gap: 14px; align-items: flex-start; }
+.contact-item-icon {
+  width: 38px; height: 38px; background: #222220; border-radius: 3px;
+  display: flex; align-items: center; justify-content: center; color: #CC1414; flex-shrink: 0;
+}
+.contact-item-title { font-size: 11px; font-weight: 600; color: #5C5A55; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+.contact-item-value { font-size: 15px; color: #F2EFE8; }
+.contact-item-sub { font-size: 13px; color: #888884; margin-top: 1px; }
+.map-embed iframe { border-radius: 4px; display: block; }
+.contact-form { display: flex; flex-direction: column; gap: 13px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 11px; font-weight: 600; color: #888884; text-transform: uppercase; letter-spacing: 0.08em; }
+.form-input {
+  background: #1E1E1C; border: 1px solid #2A2A28; border-radius: 3px;
+  color: #F2EFE8; font-family: 'Barlow', sans-serif; font-size: 14px; padding: 10px 13px;
+  outline: none; transition: border-color 180ms; width: 100%;
+}
+.form-input:focus { border-color: #CC1414; }
+.form-input::placeholder { color: #5C5A55; }
+textarea.form-input { resize: none; height: 100px; }
+select.form-input { appearance: none; -webkit-appearance: none; }
+.form-submit {
+  background: #CC1414; color: #F2EFE8; border: none;
+  padding: 13px 32px; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+  border-radius: 3px; align-self: flex-start;
+  transition: background 180ms, transform 120ms;
+}
+.form-submit:hover { background: #E51818; }
+.form-submit:active { transform: scale(0.97); }
+.form-alert {
+  padding: 10px 14px; border-radius: 3px; font-size: 13px; display: none;
+}
+.form-alert.success { background: #1a3a1a; border: 1px solid #2d6a2d; color: #6fcf6f; display: block; }
+.form-alert.error   { background: #3a1a1a; border: 1px solid #6a2d2d; color: #cf6f6f; display: block; }
+
+/* ── Footer ───────────────────────────────────── */
+footer {
+  background: #0A0A09; border-top: 1px solid #222220;
+  padding: 32px 40px; display: flex; align-items: center;
+  justify-content: space-between; position: relative; z-index: 1;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-brand { display: flex; align-items: center; gap: 10px; }
+.footer-brand img { width: 36px; height: 36px; object-fit: contain; border-radius: 3px; }
+.footer-brand-placeholder {
+  width: 36px; height: 36px; background: #CC1414; border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 14px; color: #fff;
+}
+.footer-brand-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 18px; color: #F2EFE8; text-transform: uppercase; }
+.footer-brand-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; color: #CC1414; letter-spacing: 0.18em; text-transform: uppercase; }
+.footer-copy { font-size: 12px; color: #5C5A55; }
+.footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+.footer-links a { font-size: 13px; color: #5C5A55; transition: color 180ms; display: flex; align-items: center; gap: 5px; }
+.footer-links a:hover { color: #888884; }
+
+/* ── Responsive ───────────────────────────────── */
+@media (max-width: 900px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  section { padding: 64px 20px; }
+  #hero { padding: 90px 20px 60px; }
+  .services-grid { grid-template-columns: 1fr 1fr; }
+  .about-grid { grid-template-columns: 1fr; gap: 40px; }
+  .about-photos { grid-template-rows: 160px 160px; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+  .photo-band-text { left: 20px; right: 20px; }
+  .photo-band-text h3 { font-size: 28px; }
+  footer { padding: 24px 20px; flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 560px) {
+  .services-grid { grid-template-columns: 1fr; }
+  .hero-stats { gap: 24px; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="top">
+  <div class="nav-logo">
+    {% if taller and taller.logo %}
+      <img src="{{ taller.logo.url }}" alt="{{ taller.nombre }}">
+    {% else %}
+      <div class="nav-logo-placeholder">K</div>
+    {% endif %}
+    <div class="nav-logo-text">
+      <div class="brand">{% if taller %}{{ taller.nombre }}{% else %}Keloke{% endif %}</div>
+      <div class="tagline">Taller Mecánico de Motos</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#top" class="active">Inicio</a>
+    <a href="#servicios">Servicios</a>
+    <a href="#precios">Precios</a>
+    <a href="#contacto">Contacto</a>
+  </div>
+  <button class="nav-cta" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth',block:'start'})">Agendar</button>
+</nav>
 
 <!-- HERO -->
-<section class="relative overflow-hidden bg-gray-950 pt-24 pb-28 px-4">
-
-  <!-- Imagen fondo -->
-  <div class="absolute inset-0">
-    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80"
-         class="w-full h-full object-cover opacity-30">
-  </div>
-  <div class="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
-
-  <div class="relative max-w-4xl mx-auto text-center">
-    <span class="text-red-500 uppercase text-xs tracking-widest font-semibold">
-      Taller especializado en motos
-    </span>
-
-    <h1 class="text-5xl sm:text-6xl md:text-7xl font-black mt-4 mb-6 leading-tight">
-      Tu moto en manos<br>
-      <span class="text-red-500">expertas</span>
-    </h1>
-
-    <p class="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
-      Diagnóstico claro, sin inventos. Reparamos tu moto rápido y bien.
-    </p>
-
-    <div class="flex flex-col sm:flex-row gap-3 justify-center">
-      <a href="https://wa.me/56920106974?text=Hola,%20quiero%20cotizar%20mi%20moto"
-         class="bg-red-600 hover:bg-red-500 text-white font-bold px-8 py-3 rounded-xl">
-        Agendar por WhatsApp
-      </a>
-
-      <a href="#servicios"
-         class="border border-white/10 px-8 py-3 rounded-xl text-gray-300 hover:text-white">
-        Ver servicios
-      </a>
+<section id="hero">
+  <div class="hero-img"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-line"></div>
+      <div class="hero-eyebrow-text">Taller Especializado en Motos</div>
     </div>
-  </div>
-
-  <!-- Stats -->
-  <div class="relative max-w-3xl mx-auto mt-16 grid grid-cols-2 sm:grid-cols-4 gap-px bg-white/5 rounded-2xl overflow-hidden border border-white/5">
-    <div class="bg-gray-950 px-6 py-5 text-center">
-      <p class="text-2xl font-black text-white">+3000</p>
-      <p class="text-xs text-gray-500">Motos atendidas</p>
+    <h1 class="hero-title">TU MOTO EN<br><em>MANOS</em><br>EXPERTAS</h1>
+    <p class="hero-body">Revisamos, diagnosticamos y reparamos tu moto con los mejores repuestos del mercado. Sin vueltas, sin sorpresas.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth',block:'start'})">Agendar Revisión</button>
+      <button class="btn-outline" onclick="document.getElementById('servicios').scrollIntoView({behavior:'smooth',block:'start'})">Ver Servicios</button>
     </div>
-    <div class="bg-gray-950 px-6 py-5 text-center">
-      <p class="text-2xl font-black text-white">12+</p>
-      <p class="text-xs text-gray-500">Años experiencia</p>
-    </div>
-    <div class="bg-gray-950 px-6 py-5 text-center">
-      <p class="text-2xl font-black text-white">100%</p>
-      <p class="text-xs text-gray-500">Transparencia</p>
-    </div>
-    <div class="bg-gray-950 px-6 py-5 text-center">
-      <p class="text-2xl font-black text-white">24h</p>
-      <p class="text-xs text-gray-500">Respuesta</p>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num">+<span>12</span></div>
+        <div class="hero-stat-label">Años de experiencia</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">+<span>3.000</span></div>
+        <div class="hero-stat-label">Motos atendidas</div>
+      </div>
+      <div>
+        <div class="hero-stat-num"><span>Todas</span></div>
+        <div class="hero-stat-label">Las marcas</div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- SERVICIOS -->
-<section id="servicios" class="py-24 px-4 bg-gray-900">
-  <div class="max-w-6xl mx-auto">
-
-    <div class="text-center mb-14">
-      <p class="text-xs font-semibold text-red-500 uppercase tracking-widest mb-3">Servicios</p>
-      <h2 class="text-3xl sm:text-4xl font-black mb-3">Lo que hacemos</h2>
-      <p class="text-gray-400">Desde mantención básica hasta reparación completa</p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
+<section id="servicios">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><div class="section-eyebrow-text">Lo que hacemos</div></div>
+    <h2 class="section-title">NUESTROS SERVICIOS</h2>
+    <p class="section-body">Trabajamos con todas las marcas y modelos. Desde el cambio de aceite hasta reparaciones mayores.</p>
+  </div>
+  <div class="services-grid">
+    {% if servicios %}
       {% for servicio in servicios %}
-      <div class="bg-gray-950 border border-white/5 hover:border-red-600/40 rounded-2xl p-6 transition">
-
-        <h3 class="font-bold text-white mb-2">
-          {{ servicio.nombre }}
-        </h3>
-
-        <p class="text-gray-400 text-sm mb-4">
-          {{ servicio.descripcion }}
-        </p>
-
-        {% if servicio.precio %}
-        <p class="text-red-500 font-semibold">
-          Desde ${{ servicio.precio }}
-        </p>
-        {% endif %}
-
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="{{ servicio.icono }}" style="width:17px;height:17px"></i></div>
+        <div class="service-title">{{ servicio.nombre }}</div>
+        <div class="service-desc">{{ servicio.descripcion }}</div>
       </div>
-      {% empty %}
-      <p class="text-gray-400">No hay servicios disponibles</p>
       {% endfor %}
+    {% else %}
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="droplet" style="width:17px;height:17px"></i></div>
+        <div class="service-title">Cambio de Aceite y Filtros</div>
+        <div class="service-desc">Aceite mineral, sintético o semisintético. Incluye revisión de niveles y filtro de aceite.</div>
+        <div class="service-price">$15.000 <span>desde</span></div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="settings" style="width:17px;height:17px"></i></div>
+        <div class="service-title">Mantención Preventiva</div>
+        <div class="service-desc">Revisión completa: bujías, cadena, frenos, suspensión, eléctrico y niveles.</div>
+        <div class="service-price">$35.000 <span>desde</span></div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="zap" style="width:17px;height:17px"></i></div>
+        <div class="service-title">Sistema Eléctrico</div>
+        <div class="service-desc">Diagnóstico y reparación de batería, arranque, alternador, luces y sensores.</div>
+        <div class="service-price">$25.000 <span>diagnóstico</span></div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="circle" style="width:17px;height:17px"></i></div>
+        <div class="service-title">Frenos y Suspensión</div>
+        <div class="service-desc">Cambio de pastillas, discos, líquido de frenos. Revisión y ajuste de suspensión.</div>
+        <div class="service-price">$20.000 <span>desde</span></div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="wrench" style="width:17px;height:17px"></i></div>
+        <div class="service-title">Reparación de Motor</div>
+        <div class="service-desc">Reconstrucción de motor, culatas, pistones y cigüeñal. Diagnóstico sin costo adicional.</div>
+        <div class="service-price">Cotizar</div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="check-circle" style="width:17px;height:17px"></i></div>
+        <div class="service-title">Revisión Pre-RVM</div>
+        <div class="service-desc">Preparamos tu moto para pasar la revisión técnica vehicular sin problemas.</div>
+        <div class="service-price">$18.000 <span>desde</span></div>
+      </div>
+    {% endif %}
+  </div>
+</section>
 
+<!-- PHOTO BAND -->
+<div class="photo-band">
+  <img src="https://images.unsplash.com/photo-1609218827273-c4a1f5f8c7a3?w=1600&q=80" alt="Taller mecánico">
+  <div class="photo-band-overlay"></div>
+  <div class="photo-band-text">
+    <h3>EXPERTOS EN <span>TODAS LAS MARCAS</span></h3>
+  </div>
+</div>
+
+<!-- NOSOTROS -->
+<section id="nosotros">
+  <div class="about-grid">
+    <div class="about-text">
+      <div class="section-eyebrow"><div class="section-eyebrow-line"></div><div class="section-eyebrow-text">Quiénes somos</div></div>
+      <h2 class="section-title">EL TALLER QUE TU MOTO MERECE</h2>
+      <p class="section-body">Más de 12 años reparando motos en el barrio. Somos mecánicos apasionados, no vendedores de servicios innecesarios.</p>
+      <div class="about-features">
+        <div class="about-feature">
+          <div class="about-feature-icon"><i data-lucide="shield-check" style="width:15px;height:15px"></i></div>
+          <div>
+            <div class="about-feature-title">Garantía en todos los trabajos</div>
+            <div class="about-feature-body">30 días o 1.000 km en mano de obra en todos nuestros servicios.</div>
+          </div>
+        </div>
+        <div class="about-feature">
+          <div class="about-feature-icon"><i data-lucide="package" style="width:15px;height:15px"></i></div>
+          <div>
+            <div class="about-feature-title">Repuestos originales y alternativos</div>
+            <div class="about-feature-body">Trabajamos con repuestos originales y alternativas de calidad certificada.</div>
+          </div>
+        </div>
+        <div class="about-feature">
+          <div class="about-feature-icon"><i data-lucide="message-circle" style="width:15px;height:15px"></i></div>
+          <div>
+            <div class="about-feature-title">Te avisamos por WhatsApp</div>
+            <div class="about-feature-body">Cuando tu moto está lista te avisamos al tiro. Sin demoras ni sorpresas.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="about-photos">
+      <div class="about-photo tall">
+        <img src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=600&q=80" alt="Motocicleta en taller">
+      </div>
+      <div class="about-photo">
+        <img src="https://images.unsplash.com/photo-1591637333184-19aa84b3e01f?w=600&q=80" alt="Mecánico trabajando">
+      </div>
+      <div class="about-photo">
+        <img src="https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=600&q=80" alt="Motor de moto">
+      </div>
     </div>
   </div>
 </section>
 
-<!-- DIFERENCIADOR -->
-<section class="py-24 px-4 bg-gray-950">
-  <div class="max-w-5xl mx-auto text-center">
-
-    <h2 class="text-3xl sm:text-4xl font-black mb-10">
-      ¿Por qué elegirnos?
-    </h2>
-
-    <div class="grid md:grid-cols-2 gap-6 text-left">
-
-      <div class="bg-gray-900 p-6 rounded-xl border border-white/5">
-        <h3 class="text-white font-semibold mb-2">Sin inventos</h3>
-        <p class="text-gray-400 text-sm">Te decimos exactamente qué tiene tu moto y cuánto cuesta.</p>
-      </div>
-
-      <div class="bg-gray-900 p-6 rounded-xl border border-white/5">
-        <h3 class="text-white font-semibold mb-2">Experiencia real</h3>
-        <p class="text-gray-400 text-sm">Más de 12 años trabajando con motos de todo tipo.</p>
-      </div>
-
-      <div class="bg-gray-900 p-6 rounded-xl border border-white/5">
-        <h3 class="text-white font-semibold mb-2">Entrega rápida</h3>
-        <p class="text-gray-400 text-sm">La mayoría de trabajos listos en menos de 24h.</p>
-      </div>
-
-      <div class="bg-gray-900 p-6 rounded-xl border border-white/5">
-        <h3 class="text-white font-semibold mb-2">Garantía</h3>
-        <p class="text-gray-400 text-sm">Todos los trabajos tienen respaldo.</p>
-      </div>
-
+<!-- PRECIOS -->
+<section id="precios">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><div class="section-eyebrow-text">Tarifas</div></div>
+    <h2 class="section-title">PRECIOS CLAROS</h2>
+    <p class="section-body">Sin cobros ocultos. El precio que te decimos es el que pagas.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-name">Básico</div>
+      <div class="pricing-price">$15.000<sub> desde</sub></div>
+      <div class="pricing-desc">Para motos al día que solo necesitan un servicio puntual.</div>
+      <ul class="pricing-includes">
+        <li>Cambio de aceite + filtro</li>
+        <li>Revisión de cadena y lubricación</li>
+        <li>Revisión de presión de neumáticos</li>
+        <li>Inspección visual general</li>
+      </ul>
+      <button class="pricing-btn" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth',block:'start'})">Agendar</button>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-tag">Más Popular</div>
+      <div class="pricing-name">Mantención Completa</div>
+      <div class="pricing-price">$55.000<sub> desde</sub></div>
+      <div class="pricing-desc">El servicio completo para mantener tu moto en óptimas condiciones.</div>
+      <ul class="pricing-includes">
+        <li>Cambio de aceite + filtros (aire y aceite)</li>
+        <li>Bujías nuevas</li>
+        <li>Ajuste y lubricación de cadena</li>
+        <li>Revisión de frenos completa</li>
+        <li>Diagnóstico eléctrico</li>
+        <li>Revisión de suspensión</li>
+      </ul>
+      <button class="pricing-btn" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth',block:'start'})">Agendar</button>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-name">Diagnóstico</div>
+      <div class="pricing-price">$25.000</div>
+      <div class="pricing-desc">Tu moto presenta una falla y necesitamos encontrar la causa exacta.</div>
+      <ul class="pricing-includes">
+        <li>Diagnóstico computarizado</li>
+        <li>Inspección mecánica completa</li>
+        <li>Informe detallado de fallas</li>
+        <li>Cotización sin compromiso</li>
+      </ul>
+      <button class="pricing-btn" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth',block:'start'})">Agendar</button>
     </div>
   </div>
 </section>
 
-<!-- CTA FINAL -->
-<section id="contacto" class="py-24 px-4 bg-gray-900">
-  <div class="max-w-3xl mx-auto text-center">
+<!-- VALORACIONES -->
+<section id="valoraciones">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><div class="section-eyebrow-text">Lo que dicen</div></div>
+    <h2 class="section-title">VALORACIONES</h2>
+    <p class="section-body">La opinión de nuestros clientes en Google.</p>
+  </div>
+  <div style="max-width:1100px;margin:0 auto;">
+    <script src="https://elfsightcdn.com/platform.js" async></script>
+    <div class="elfsight-app-4a29eb6e-40d9-4b3b-b5ee-07be72f7822d" data-elfsight-app-lazy></div>
+  </div>
+</section>
 
-    <h2 class="text-3xl sm:text-4xl font-black mb-4">
-      Agenda tu revisión
-    </h2>
-
-    <p class="text-gray-400 mb-10">
-      Escríbenos directo por WhatsApp y te respondemos rápido.
+<!-- CONTACTO -->
+<section id="contacto">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><div class="section-eyebrow-text">Contáctanos</div></div>
+    <h2 class="section-title">AGENDA TU REVISIÓN</h2>
+    <p class="section-body">
+      {% if taller and taller.horario %}{{ taller.horario }}{% else %}Escríbenos o visítanos. Atendemos de lunes a sábado.{% endif %}
     </p>
+  </div>
+  <div class="contact-grid">
+    <div class="contact-info">
+      <div class="contact-item">
+        <div class="contact-item-icon"><i data-lucide="map-pin" style="width:17px;height:17px"></i></div>
+        <div>
+          <div class="contact-item-title">Dirección</div>
+          <div class="contact-item-value">{% if taller and taller.direccion %}{{ taller.direccion }}{% else %}El Pino 1113, Melipilla{% endif %}</div>
+          <div class="contact-item-sub">Región Metropolitana, Chile</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-icon"><i data-lucide="phone" style="width:17px;height:17px"></i></div>
+        <div>
+          <div class="contact-item-title">Teléfono / WhatsApp</div>
+          <div class="contact-item-value">
+            {% if taller and taller.telefono %}
+              <a href="https://wa.me/56{{ taller.telefono|cut:'+56'|cut:' '|cut:'-' }}" style="color:#F2EFE8">{{ taller.telefono }}</a>
+            {% else %}
+              <a href="https://wa.me/56920106974" style="color:#F2EFE8">+56 9 2010 6974</a>
+            {% endif %}
+          </div>
+          <div class="contact-item-sub">Respuesta en menos de 1 hora</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-icon"><i data-lucide="clock" style="width:17px;height:17px"></i></div>
+        <div>
+          <div class="contact-item-title">Horario</div>
+          <div class="contact-item-value">Lun–Vie: 8:30 – 18:30</div>
+          <div class="contact-item-sub">Sábado: 9:00 – 14:00</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-icon"><i data-lucide="instagram" style="width:17px;height:17px"></i></div>
+        <div>
+          <div class="contact-item-title">Instagram</div>
+          <div class="contact-item-value">
+            <a href="https://www.instagram.com/davidgraterol980/" target="_blank" style="color:#CC1414">@davidgraterol980</a>
+          </div>
+        </div>
+      </div>
+      <div class="map-embed">
+        <iframe
+          src="https://maps.google.com/maps?q=El+Pino+1113+Melipilla+Chile&output=embed&z=16"
+          width="100%" height="220"
+          style="border:0;border-radius:4px;filter:grayscale(1) invert(0.85) contrast(0.9);"
+          allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    </div>
 
-    <a href="https://wa.me/56920106974?text=Hola,%20quiero%20agendar%20una%20revisión"
-       class="bg-green-500 hover:bg-green-400 text-white font-bold px-10 py-4 rounded-xl text-lg">
-       Hablar por WhatsApp
-    </a>
-
+    <!-- Formulario Django con CSRF -->
+    <form class="contact-form" method="post" action="{% url 'publico:landing' %}" id="contactoForm">
+      {% csrf_token %}
+      <input type="hidden" name="form_contacto" value="1">
+      <div id="formAlert" class="form-alert"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="nombre">Nombre</label>
+          <input class="form-input" type="text" id="nombre" name="nombre" placeholder="Tu nombre" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="telefono_contacto">Teléfono</label>
+          <input class="form-input" type="text" id="telefono_contacto" name="telefono_contacto" placeholder="+56 9 ...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="marca_moto">Modelo de Moto</label>
+        <select class="form-input" id="marca_moto" name="marca_moto">
+          <option value="">Selecciona una marca</option>
+          <option>Honda</option>
+          <option>Yamaha</option>
+          <option>Suzuki</option>
+          <option>Kawasaki</option>
+          <option>Bajaj</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="servicio_solicitado">Servicio</label>
+        <select class="form-input" id="servicio_solicitado" name="servicio_solicitado">
+          <option value="">¿Qué necesitas?</option>
+          <option>Cambio de aceite y filtros</option>
+          <option>Mantención preventiva</option>
+          <option>Sistema eléctrico</option>
+          <option>Frenos y suspensión</option>
+          <option>Reparación de motor</option>
+          <option>Diagnóstico general</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="mensaje">Mensaje</label>
+        <textarea class="form-input" id="mensaje" name="mensaje" placeholder="Cuéntanos qué le pasa a tu moto..."></textarea>
+      </div>
+      {% if messages %}
+        {% for message in messages %}
+          <div class="form-alert {{ message.tags }}" style="display:block">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      <button type="submit" class="form-submit">Enviar Solicitud</button>
+    </form>
   </div>
 </section>
 
-<!-- BOTÓN FLOTANTE -->
-<a href="https://wa.me/56920106974?text=Hola,%20quiero%20cotizar"
-   class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-400 text-white p-4 rounded-full shadow-lg z-50">
-   💬
-</a>
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    {% if taller and taller.logo %}
+      <img src="{{ taller.logo.url }}" alt="{{ taller.nombre }}">
+    {% else %}
+      <div class="footer-brand-placeholder">K</div>
+    {% endif %}
+    <div>
+      <div class="footer-brand-name">{% if taller %}{{ taller.nombre }}{% else %}Keloke{% endif %}</div>
+      <div class="footer-brand-sub">Taller Mecánico de Motos</div>
+    </div>
+  </div>
+  <div class="footer-copy">
+    © 2025 {% if taller %}{{ taller.nombre }}{% else %}Keloke Taller Mecánico{% endif %} —
+    {% if taller and taller.direccion %}{{ taller.direccion }}{% else %}El Pino 1113, Melipilla{% endif %}
+  </div>
+  <div class="footer-links">
+    <a href="#servicios">Servicios</a>
+    <a href="#precios">Precios</a>
+    <a href="#contacto">Contacto</a>
+    <a href="https://www.instagram.com/davidgraterol980/" target="_blank">
+      <i data-lucide="instagram" style="width:13px;height:13px"></i>Instagram
+    </a>
+    <a href="https://wa.me/56920106974" target="_blank">
+      <i data-lucide="message-circle" style="width:13px;height:13px"></i>WhatsApp
+    </a>
+  </div>
+</footer>
 
-{% endblock %}
+<script>
+  lucide.createIcons();
+
+  // Envío AJAX para no recargar la página
+  const form = document.getElementById('contactoForm');
+  const alertBox = document.getElementById('formAlert');
+
+  if (form) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = form.querySelector('.form-submit');
+      btn.textContent = 'Enviando...';
+      btn.disabled = true;
+      alertBox.className = 'form-alert';
+      alertBox.textContent = '';
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await res.json();
+        alertBox.className = 'form-alert ' + (data.ok ? 'success' : 'error');
+        alertBox.textContent = data.mensaje;
+        if (data.ok) form.reset();
+      } catch(err) {
+        alertBox.className = 'form-alert error';
+        alertBox.textContent = 'Error al enviar. Escríbenos por WhatsApp.';
+      }
+
+      btn.textContent = 'Enviar Solicitud';
+      btn.disabled = false;
+    });
+  }
+</script>
+</body>
+</html>
