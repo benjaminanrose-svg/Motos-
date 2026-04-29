@@ -1,22 +1,61 @@
-{% extends "base_publico.html" %}
-{% block title %}Keloke — Taller Mecánico de Motos{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% if taller %}{{ taller.nombre }}{% else %}Keloke{% endif %} — Taller Mecánico de Motos</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ── Reset & Base ─────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: #111110; color: #F2EFE8;
+  font-family: 'Barlow', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: inherit; }
 
-{% block extra_styles %}
-/* ── Section commons ──────────────────────────── */
-section { padding: 96px 40px; position: relative; z-index: 1; }
-.section-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.section-eyebrow-line { width: 24px; height: 2px; background: #CC1414; }
-.section-eyebrow-text {
-  font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 500;
-  letter-spacing: 0.2em; text-transform: uppercase; color: #CC1414;
+/* ── Nav ──────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 68px;
+  background: rgba(12,12,11,0.95); backdrop-filter: blur(16px);
+  border-bottom: 1px solid #2A2A28;
 }
-.section-title {
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 44px;
-  text-transform: uppercase; letter-spacing: -0.01em; line-height: 1;
-  color: #F2EFE8; margin-bottom: 14px;
+.nav-logo { display: flex; align-items: center; gap: 12px; }
+.nav-logo img { width: 48px; height: 48px; object-fit: contain; border-radius: 4px; }
+.nav-logo-placeholder {
+  width: 48px; height: 48px; background: #CC1414; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 18px; color: #fff;
 }
-.section-body { font-size: 15px; color: #A09D96; line-height: 1.65; max-width: 500px; }
-.section-header { max-width: 1100px; margin: 0 auto 52px; }
+.nav-logo-text .brand {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 22px;
+  color: #F2EFE8; line-height: 1; letter-spacing: 0.02em; text-transform: uppercase;
+}
+.nav-logo-text .tagline {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 500; font-size: 10px;
+  color: #CC1414; letter-spacing: 0.18em; text-transform: uppercase;
+}
+.nav-links { display: flex; gap: 32px; }
+.nav-links a {
+  font-size: 13px; font-weight: 500; color: #888884;
+  letter-spacing: 0.03em; transition: color 180ms;
+}
+.nav-links a:hover, .nav-links a.active { color: #F2EFE8; }
+.nav-cta {
+  background: #CC1414; color: #F2EFE8; border: none;
+  padding: 9px 24px; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+  border-radius: 3px; transition: background 180ms;
+}
+.nav-cta:hover { background: #E51818; }
 
 /* ── Hero ─────────────────────────────────────── */
 #hero {
@@ -51,7 +90,7 @@ section { padding: 96px 40px; position: relative; z-index: 1; }
   background: #CC1414; color: #F2EFE8; border: none;
   padding: 13px 30px; font-family: 'Barlow Condensed', sans-serif;
   font-size: 14px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
-  border-radius: 3px; transition: background 180ms, transform 120ms; cursor: pointer;
+  border-radius: 3px; transition: background 180ms, transform 120ms;
 }
 .btn-primary:hover { background: #E51818; }
 .btn-primary:active { transform: scale(0.97); }
@@ -59,7 +98,7 @@ section { padding: 96px 40px; position: relative; z-index: 1; }
   background: transparent; color: #F2EFE8; border: 1px solid #3A3A38;
   padding: 13px 30px; font-family: 'Barlow Condensed', sans-serif;
   font-size: 14px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
-  border-radius: 3px; transition: border-color 180ms; cursor: pointer;
+  border-radius: 3px; transition: border-color 180ms;
 }
 .btn-outline:hover { border-color: #888884; }
 .hero-stats {
@@ -72,6 +111,22 @@ section { padding: 96px 40px; position: relative; z-index: 1; }
 }
 .hero-stat-num span { color: #CC1414; }
 .hero-stat-label { font-size: 11px; color: #5C5A55; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px; }
+
+/* ── Section commons ──────────────────────────── */
+section { padding: 96px 40px; position: relative; z-index: 1; }
+.section-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.section-eyebrow-line { width: 24px; height: 2px; background: #CC1414; }
+.section-eyebrow-text {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase; color: #CC1414;
+}
+.section-title {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 44px;
+  text-transform: uppercase; letter-spacing: -0.01em; line-height: 1;
+  color: #F2EFE8; margin-bottom: 14px;
+}
+.section-body { font-size: 15px; color: #A09D96; line-height: 1.65; max-width: 500px; }
+.section-header { max-width: 1100px; margin: 0 auto 52px; }
 
 /* ── Services ─────────────────────────────────── */
 #servicios { background: #111110; }
@@ -95,20 +150,6 @@ section { padding: 96px 40px; position: relative; z-index: 1; }
   color: #F2EFE8; margin-top: 4px;
 }
 .service-price span { font-size: 11px; color: #5C5A55; font-weight: 400; margin-left: 2px; }
-
-/* ── Photo band ───────────────────────────────── */
-.photo-band { height: 260px; overflow: hidden; position: relative; z-index: 1; }
-.photo-band img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.5) brightness(0.6); }
-.photo-band-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(17,17,16,0.6) 0%, transparent 40%, transparent 60%, rgba(17,17,16,0.8) 100%);
-}
-.photo-band-text { position: absolute; bottom: 32px; left: 40px; right: 40px; }
-.photo-band-text h3 {
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 40px;
-  text-transform: uppercase; color: #F2EFE8; letter-spacing: -0.01em;
-}
-.photo-band-text h3 span { color: #CC1414; }
 
 /* ── About ────────────────────────────────────── */
 #nosotros { background: #151514; border-top: 1px solid #222220; border-bottom: 1px solid #222220; }
@@ -160,11 +201,25 @@ section { padding: 96px 40px; position: relative; z-index: 1; }
   font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 500;
   letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px;
   border: 1px solid #2A2A28; background: transparent; color: #F2EFE8;
-  transition: border-color 180ms, background 180ms; cursor: pointer;
+  transition: border-color 180ms, background 180ms;
 }
 .pricing-btn:hover { border-color: #CC1414; }
 .pricing-card.featured .pricing-btn { background: #CC1414; border-color: #CC1414; }
 .pricing-card.featured .pricing-btn:hover { background: #E51818; }
+
+/* ── Photo band ───────────────────────────────── */
+.photo-band { height: 260px; overflow: hidden; position: relative; z-index: 1; }
+.photo-band img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.5) brightness(0.6); }
+.photo-band-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(17,17,16,0.6) 0%, transparent 40%, transparent 60%, rgba(17,17,16,0.8) 100%);
+}
+.photo-band-text { position: absolute; bottom: 32px; left: 40px; right: 40px; }
+.photo-band-text h3 {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 40px;
+  text-transform: uppercase; color: #F2EFE8; letter-spacing: -0.01em;
+}
+.photo-band-text h3 span { color: #CC1414; }
 
 /* ── Valoraciones ─────────────────────────────── */
 #valoraciones { background: #111110; border-top: 1px solid #222220; }
@@ -181,6 +236,7 @@ section { padding: 96px 40px; position: relative; z-index: 1; }
 .contact-item-title { font-size: 11px; font-weight: 600; color: #5C5A55; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
 .contact-item-value { font-size: 15px; color: #F2EFE8; }
 .contact-item-sub { font-size: 13px; color: #888884; margin-top: 1px; }
+.map-embed iframe { border-radius: 4px; display: block; }
 .contact-form { display: flex; flex-direction: column; gap: 13px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .form-group { display: flex; flex-direction: column; gap: 5px; }
@@ -188,42 +244,93 @@ section { padding: 96px 40px; position: relative; z-index: 1; }
 .form-input {
   background: #1E1E1C; border: 1px solid #2A2A28; border-radius: 3px;
   color: #F2EFE8; font-family: 'Barlow', sans-serif; font-size: 14px; padding: 10px 13px;
-  outline: none; transition: border-color 180ms;
+  outline: none; transition: border-color 180ms; width: 100%;
 }
 .form-input:focus { border-color: #CC1414; }
 .form-input::placeholder { color: #5C5A55; }
 textarea.form-input { resize: none; height: 100px; }
-select.form-input { appearance: none; }
+select.form-input { appearance: none; -webkit-appearance: none; }
 .form-submit {
   background: #CC1414; color: #F2EFE8; border: none;
   padding: 13px 32px; font-family: 'Barlow Condensed', sans-serif;
   font-size: 14px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
   border-radius: 3px; align-self: flex-start;
-  transition: background 180ms, transform 120ms; cursor: pointer;
+  transition: background 180ms, transform 120ms;
 }
 .form-submit:hover { background: #E51818; }
 .form-submit:active { transform: scale(0.97); }
+.form-alert {
+  padding: 10px 14px; border-radius: 3px; font-size: 13px; display: none;
+}
+.form-alert.success { background: #1a3a1a; border: 1px solid #2d6a2d; color: #6fcf6f; display: block; }
+.form-alert.error   { background: #3a1a1a; border: 1px solid #6a2d2d; color: #cf6f6f; display: block; }
+
+/* ── Footer ───────────────────────────────────── */
+footer {
+  background: #0A0A09; border-top: 1px solid #222220;
+  padding: 32px 40px; display: flex; align-items: center;
+  justify-content: space-between; position: relative; z-index: 1;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-brand { display: flex; align-items: center; gap: 10px; }
+.footer-brand img { width: 36px; height: 36px; object-fit: contain; border-radius: 3px; }
+.footer-brand-placeholder {
+  width: 36px; height: 36px; background: #CC1414; border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 14px; color: #fff;
+}
+.footer-brand-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 18px; color: #F2EFE8; text-transform: uppercase; }
+.footer-brand-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; color: #CC1414; letter-spacing: 0.18em; text-transform: uppercase; }
+.footer-copy { font-size: 12px; color: #5C5A55; }
+.footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+.footer-links a { font-size: 13px; color: #5C5A55; transition: color 180ms; display: flex; align-items: center; gap: 5px; }
+.footer-links a:hover { color: #888884; }
 
 /* ── Responsive ───────────────────────────────── */
 @media (max-width: 900px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
   section { padding: 64px 20px; }
+  #hero { padding: 90px 20px 60px; }
   .services-grid { grid-template-columns: 1fr 1fr; }
-  .pricing-grid { grid-template-columns: 1fr; max-width: 480px; }
   .about-grid { grid-template-columns: 1fr; gap: 40px; }
-  .about-photos { display: none; }
+  .about-photos { grid-template-rows: 160px 160px; }
+  .pricing-grid { grid-template-columns: 1fr; }
   .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+  .photo-band-text { left: 20px; right: 20px; }
   .photo-band-text h3 { font-size: 28px; }
-  .photo-band-text { left: 20px; }
+  footer { padding: 24px 20px; flex-direction: column; align-items: flex-start; }
 }
-@media (max-width: 600px) {
-  #hero { padding: 80px 20px 60px; }
+@media (max-width: 560px) {
   .services-grid { grid-template-columns: 1fr; }
   .hero-stats { gap: 24px; }
   .form-row { grid-template-columns: 1fr; }
 }
-{% endblock %}
+</style>
+</head>
+<body>
 
-{% block content %}
+<!-- NAV -->
+<nav id="top">
+  <div class="nav-logo">
+    {% if taller and taller.logo %}
+      <img src="{{ taller.logo.url }}" alt="{{ taller.nombre }}">
+    {% else %}
+      <div class="nav-logo-placeholder">K</div>
+    {% endif %}
+    <div class="nav-logo-text">
+      <div class="brand">{% if taller %}{{ taller.nombre }}{% else %}Keloke{% endif %}</div>
+      <div class="tagline">Taller Mecánico de Motos</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#top" class="active">Inicio</a>
+    <a href="#servicios">Servicios</a>
+    <a href="#precios">Precios</a>
+    <a href="#contacto">Contacto</a>
+  </div>
+  <button class="nav-cta" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth',block:'start'})">Agendar</button>
+</nav>
 
 <!-- HERO -->
 <section id="hero">
@@ -237,8 +344,8 @@ select.form-input { appearance: none; }
     <h1 class="hero-title">TU MOTO EN<br><em>MANOS</em><br>EXPERTAS</h1>
     <p class="hero-body">Revisamos, diagnosticamos y reparamos tu moto con los mejores repuestos del mercado. Sin vueltas, sin sorpresas.</p>
     <div class="hero-actions">
-      <button class="btn-primary" onclick="document.getElementById('contacto').scrollIntoView({block:'start'})">Agendar Revisión</button>
-      <button class="btn-outline" onclick="document.getElementById('servicios').scrollIntoView({block:'start'})">Ver Servicios</button>
+      <button class="btn-primary" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth',block:'start'})">Agendar Revisión</button>
+      <button class="btn-outline" onclick="document.getElementById('servicios').scrollIntoView({behavior:'smooth',block:'start'})">Ver Servicios</button>
     </div>
     <div class="hero-stats">
       <div>
@@ -268,10 +375,9 @@ select.form-input { appearance: none; }
     {% if servicios %}
       {% for servicio in servicios %}
       <div class="service-card">
-        <div class="service-icon"><i data-lucide="wrench" style="width:17px;height:17px"></i></div>
+        <div class="service-icon"><i data-lucide="{{ servicio.icono }}" style="width:17px;height:17px"></i></div>
         <div class="service-title">{{ servicio.nombre }}</div>
         <div class="service-desc">{{ servicio.descripcion }}</div>
-        {% if servicio.precio %}<div class="service-price">${{ servicio.precio|floatformat:0 }} <span>desde</span></div>{% endif %}
       </div>
       {% endfor %}
     {% else %}
@@ -387,7 +493,7 @@ select.form-input { appearance: none; }
         <li>Revisión de presión de neumáticos</li>
         <li>Inspección visual general</li>
       </ul>
-      <button class="pricing-btn" onclick="document.getElementById('contacto').scrollIntoView({block:'start'})">Agendar</button>
+      <button class="pricing-btn" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth',block:'start'})">Agendar</button>
     </div>
     <div class="pricing-card featured">
       <div class="pricing-tag">Más Popular</div>
@@ -402,7 +508,7 @@ select.form-input { appearance: none; }
         <li>Diagnóstico eléctrico</li>
         <li>Revisión de suspensión</li>
       </ul>
-      <button class="pricing-btn" onclick="document.getElementById('contacto').scrollIntoView({block:'start'})">Agendar</button>
+      <button class="pricing-btn" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth',block:'start'})">Agendar</button>
     </div>
     <div class="pricing-card">
       <div class="pricing-name">Diagnóstico</div>
@@ -414,13 +520,12 @@ select.form-input { appearance: none; }
         <li>Informe detallado de fallas</li>
         <li>Cotización sin compromiso</li>
       </ul>
-      <button class="pricing-btn" onclick="document.getElementById('contacto').scrollIntoView({block:'start'})">Agendar</button>
+      <button class="pricing-btn" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth',block:'start'})">Agendar</button>
     </div>
   </div>
 </section>
 
 <!-- VALORACIONES -->
-<script src="https://elfsightcdn.com/platform.js" async></script>
 <section id="valoraciones">
   <div class="section-header">
     <div class="section-eyebrow"><div class="section-eyebrow-line"></div><div class="section-eyebrow-text">Lo que dicen</div></div>
@@ -428,6 +533,7 @@ select.form-input { appearance: none; }
     <p class="section-body">La opinión de nuestros clientes en Google.</p>
   </div>
   <div style="max-width:1100px;margin:0 auto;">
+    <script src="https://elfsightcdn.com/platform.js" async></script>
     <div class="elfsight-app-4a29eb6e-40d9-4b3b-b5ee-07be72f7822d" data-elfsight-app-lazy></div>
   </div>
 </section>
@@ -437,7 +543,9 @@ select.form-input { appearance: none; }
   <div class="section-header">
     <div class="section-eyebrow"><div class="section-eyebrow-line"></div><div class="section-eyebrow-text">Contáctanos</div></div>
     <h2 class="section-title">AGENDA TU REVISIÓN</h2>
-    <p class="section-body">Escríbenos o visítanos. Atendemos de lunes a sábado.</p>
+    <p class="section-body">
+      {% if taller and taller.horario %}{{ taller.horario }}{% else %}Escríbenos o visítanos. Atendemos de lunes a sábado.{% endif %}
+    </p>
   </div>
   <div class="contact-grid">
     <div class="contact-info">
@@ -445,7 +553,7 @@ select.form-input { appearance: none; }
         <div class="contact-item-icon"><i data-lucide="map-pin" style="width:17px;height:17px"></i></div>
         <div>
           <div class="contact-item-title">Dirección</div>
-          <div class="contact-item-value">El Pino 1113, Melipilla</div>
+          <div class="contact-item-value">{% if taller and taller.direccion %}{{ taller.direccion }}{% else %}El Pino 1113, Melipilla{% endif %}</div>
           <div class="contact-item-sub">Región Metropolitana, Chile</div>
         </div>
       </div>
@@ -453,7 +561,13 @@ select.form-input { appearance: none; }
         <div class="contact-item-icon"><i data-lucide="phone" style="width:17px;height:17px"></i></div>
         <div>
           <div class="contact-item-title">Teléfono / WhatsApp</div>
-          <div class="contact-item-value"><a href="https://wa.me/56920106974" style="color:#F2EFE8">+56 9 2010 6974</a></div>
+          <div class="contact-item-value">
+            {% if taller and taller.telefono %}
+              <a href="https://wa.me/56{{ taller.telefono|cut:'+56'|cut:' '|cut:'-' }}" style="color:#F2EFE8">{{ taller.telefono }}</a>
+            {% else %}
+              <a href="https://wa.me/56920106974" style="color:#F2EFE8">+56 9 2010 6974</a>
+            {% endif %}
+          </div>
           <div class="contact-item-sub">Respuesta en menos de 1 hora</div>
         </div>
       </div>
@@ -469,40 +583,51 @@ select.form-input { appearance: none; }
         <div class="contact-item-icon"><i data-lucide="instagram" style="width:17px;height:17px"></i></div>
         <div>
           <div class="contact-item-title">Instagram</div>
-          <div class="contact-item-value"><a href="https://www.instagram.com/davidgraterol980/" target="_blank" style="color:#CC1414">@davidgraterol980</a></div>
+          <div class="contact-item-value">
+            <a href="https://www.instagram.com/davidgraterol980/" target="_blank" style="color:#CC1414">@davidgraterol980</a>
+          </div>
         </div>
       </div>
-      <div>
+      <div class="map-embed">
         <iframe
           src="https://maps.google.com/maps?q=El+Pino+1113+Melipilla+Chile&output=embed&z=16"
           width="100%" height="220"
-          style="border:0;border-radius:4px;filter:grayscale(1) invert(0.85) contrast(0.9);display:block;margin-top:8px"
-          allowfullscreen="" loading="lazy">
+          style="border:0;border-radius:4px;filter:grayscale(1) invert(0.85) contrast(0.9);"
+          allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
         </iframe>
       </div>
     </div>
-    <form class="contact-form" onsubmit="return false">
+
+    <!-- Formulario Django con CSRF -->
+    <form class="contact-form" method="post" action="{% url 'publico:landing' %}" id="contactoForm">
+      {% csrf_token %}
+      <input type="hidden" name="form_contacto" value="1">
+      <div id="formAlert" class="form-alert"></div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Nombre</label>
-          <input class="form-input" type="text" placeholder="Tu nombre">
+          <label class="form-label" for="nombre">Nombre</label>
+          <input class="form-input" type="text" id="nombre" name="nombre" placeholder="Tu nombre" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Teléfono</label>
-          <input class="form-input" type="text" placeholder="+56 9 ...">
+          <label class="form-label" for="telefono_contacto">Teléfono</label>
+          <input class="form-input" type="text" id="telefono_contacto" name="telefono_contacto" placeholder="+56 9 ...">
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Modelo de Moto</label>
-        <select class="form-input">
+        <label class="form-label" for="marca_moto">Modelo de Moto</label>
+        <select class="form-input" id="marca_moto" name="marca_moto">
           <option value="">Selecciona una marca</option>
-          <option>Honda</option><option>Yamaha</option><option>Suzuki</option>
-          <option>Kawasaki</option><option>Bajaj</option><option>Otro</option>
+          <option>Honda</option>
+          <option>Yamaha</option>
+          <option>Suzuki</option>
+          <option>Kawasaki</option>
+          <option>Bajaj</option>
+          <option>Otro</option>
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Servicio</label>
-        <select class="form-input">
+        <label class="form-label" for="servicio_solicitado">Servicio</label>
+        <select class="form-input" id="servicio_solicitado" name="servicio_solicitado">
           <option value="">¿Qué necesitas?</option>
           <option>Cambio de aceite y filtros</option>
           <option>Mantención preventiva</option>
@@ -514,12 +639,84 @@ select.form-input { appearance: none; }
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Mensaje</label>
-        <textarea class="form-input" placeholder="Cuéntanos qué le pasa a tu moto..."></textarea>
+        <label class="form-label" for="mensaje">Mensaje</label>
+        <textarea class="form-input" id="mensaje" name="mensaje" placeholder="Cuéntanos qué le pasa a tu moto..."></textarea>
       </div>
+      {% if messages %}
+        {% for message in messages %}
+          <div class="form-alert {{ message.tags }}" style="display:block">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
       <button type="submit" class="form-submit">Enviar Solicitud</button>
     </form>
   </div>
 </section>
 
-{% endblock %}
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    {% if taller and taller.logo %}
+      <img src="{{ taller.logo.url }}" alt="{{ taller.nombre }}">
+    {% else %}
+      <div class="footer-brand-placeholder">K</div>
+    {% endif %}
+    <div>
+      <div class="footer-brand-name">{% if taller %}{{ taller.nombre }}{% else %}Keloke{% endif %}</div>
+      <div class="footer-brand-sub">Taller Mecánico de Motos</div>
+    </div>
+  </div>
+  <div class="footer-copy">
+    © 2025 {% if taller %}{{ taller.nombre }}{% else %}Keloke Taller Mecánico{% endif %} —
+    {% if taller and taller.direccion %}{{ taller.direccion }}{% else %}El Pino 1113, Melipilla{% endif %}
+  </div>
+  <div class="footer-links">
+    <a href="#servicios">Servicios</a>
+    <a href="#precios">Precios</a>
+    <a href="#contacto">Contacto</a>
+    <a href="https://www.instagram.com/davidgraterol980/" target="_blank">
+      <i data-lucide="instagram" style="width:13px;height:13px"></i>Instagram
+    </a>
+    <a href="https://wa.me/56920106974" target="_blank">
+      <i data-lucide="message-circle" style="width:13px;height:13px"></i>WhatsApp
+    </a>
+  </div>
+</footer>
+
+<script>
+  lucide.createIcons();
+
+  // Envío AJAX para no recargar la página
+  const form = document.getElementById('contactoForm');
+  const alertBox = document.getElementById('formAlert');
+
+  if (form) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = form.querySelector('.form-submit');
+      btn.textContent = 'Enviando...';
+      btn.disabled = true;
+      alertBox.className = 'form-alert';
+      alertBox.textContent = '';
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await res.json();
+        alertBox.className = 'form-alert ' + (data.ok ? 'success' : 'error');
+        alertBox.textContent = data.mensaje;
+        if (data.ok) form.reset();
+      } catch(err) {
+        alertBox.className = 'form-alert error';
+        alertBox.textContent = 'Error al enviar. Escríbenos por WhatsApp.';
+      }
+
+      btn.textContent = 'Enviar Solicitud';
+      btn.disabled = false;
+    });
+  }
+</script>
+</body>
+</html>
