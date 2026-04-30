@@ -8,7 +8,12 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,.railway.app').split(',')
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1', 'https://*.railway.app']
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost',
+    'http://127.0.0.1',
+    'https://*.railway.app',
+    'https://*.up.railway.app',
+]
 _extra_host = config('RAILWAY_PUBLIC_DOMAIN', default=None)
 if _extra_host:
     CSRF_TRUSTED_ORIGINS.append(f'https://{_extra_host}')
