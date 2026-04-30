@@ -10,7 +10,7 @@ def recrear_superusuario(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('configuracion', '0001_initial'),
+        ('configuracion', '0002_superusuario'),
     ]
 
     operations = [
